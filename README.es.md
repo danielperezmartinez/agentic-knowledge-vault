@@ -117,7 +117,12 @@ git clone https://github.com/danielperezmartinez/agentic-knowledge-vault.git ~/.
 
 ### Actualizar
 
-Reejecuta el instalador, o `git -C <carpeta-instalada> pull` en una copia clonada.
+- **Instalador (symlink)** — reejecuta el instalador; solo cambia la copia
+  canónica y todos los CLIs enlazados la ven. También puedes editar directamente
+  el `SKILL.md` canónico y todos los enlaces lo reflejan.
+- **Instalador (copia)** — reejecuta el instalador para refrescar la copia de
+  cada CLI.
+- **`git clone` manual** — `git -C <carpeta-instalada> pull`.
 
 ### Usarlo
 

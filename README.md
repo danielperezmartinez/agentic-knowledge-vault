@@ -113,7 +113,11 @@ git clone https://github.com/danielperezmartinez/agentic-knowledge-vault.git ~/.
 
 ### Updating
 
-Re-run the installer, or `git -C <install-dir> pull` on a cloned copy.
+- **Installer (symlink)** — re-run the installer; only the canonical copy changes
+  and every linked CLI sees it. You can also edit the canonical `SKILL.md`
+  directly and all links reflect it.
+- **Installer (copy)** — re-run the installer to refresh each CLI's copy.
+- **Manual `git clone`** — `git -C <install-dir> pull`.
 
 ### Use it
 

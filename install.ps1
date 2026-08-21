@@ -1,33 +1,17 @@
 #!/usr/bin/env pwsh
 # Instalador interactivo del skill agentic-knowledge-vault.
 #
-# Pregunta ámbito (usuario/proyecto) y para qué CLIs instalar, y copia el skill
-# en el directorio que cada CLI espera.
-#
-# Uso interactivo:
+# Interactivo (navegación con flechas):
 #   irm .../install.ps1 | iex
+#   ↑/↓ mover · espacio marcar (multi) · enter confirmar
 #
-# Uso no interactivo (variables de entorno):
-#   $env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,cursor,codex,gemini,copilot'; irm .../install.ps1 | iex
-#   $env:AKV_SCOPE='project'; $env:AKV_AGENTS='all'; irm .../install.ps1 | iex
+# No interactivo (variables de entorno):
+#   $env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,cursor'; $env:AKV_METHOD='symlink'; irm .../install.ps1 | iex
 $ErrorActionPreference = 'Stop'
 
 $SkillName = 'agentic-knowledge-vault'
 $RepoUrl   = 'https://github.com/danielperezmartinez/agentic-knowledge-vault.git'
 
-# --- Ámbito -----------------------------------------------------------------
-$Scope = $env:AKV_SCOPE
-if (-not $Scope) {
-  Write-Host ""
-  Write-Host "Ámbito de instalación:"
-  Write-Host "  1) Usuario (global, todos tus proyectos)"
-  Write-Host "  2) Proyecto (este repositorio)"
-  $ans = Read-Host "Elige [1]"
-  $Scope = if ($ans -in @('2', 'project', 'proyecto')) { 'project' } else { 'user' }
-}
-if ($Scope -notin @('user', 'project')) { $Scope = 'user' }
-
-# --- Mapa de agentes --------------------------------------------------------
 $Agents = [ordered]@{
   claude  = @{ label = 'Claude Code';    user = "$HOME/.claude/skills";  project = ".claude/skills" }
   cursor  = @{ label = 'Cursor';         user = "$HOME/.cursor/skills";  project = ".cursor/skills" }
@@ -37,49 +21,117 @@ $Agents = [ordered]@{
 }
 $Order = @('claude', 'cursor', 'codex', 'gemini', 'copilot')
 
-# --- Selección de CLIs ------------------------------------------------------
-$AgentsArg = $env:AKV_AGENTS
-if (-not $AgentsArg) {
-  Write-Host ""
-  Write-Host "¿Para qué CLIs quieres instalar el skill?"
-  for ($i = 0; $i -lt $Order.Count; $i++) {
-    Write-Host ("  {0}) {1}" -f ($i + 1), $Agents[$Order[$i]].label)
-  }
-  Write-Host "Varios separados por coma (p. ej. 1,3) o 'a' para todos."
-  $AgentsArg = Read-Host "Elige [a]"
-  if (-not $AgentsArg) { $AgentsArg = 'a' }
+try { $Interactive = -not [Console]::IsInputRedirected } catch { $Interactive = $false }
+
+# --- Motor de menús por teclado (flechas) -----------------------------------
+function Show-MenuSingle {
+  param([string]$Title, [string[]]$Options)
+  $cur = 0; $total = $Options.Count + 2; $first = $true
+  [Console]::CursorVisible = $false
+  try {
+    while ($true) {
+      if (-not $first) { [Console]::SetCursorPosition(0, [Console]::CursorTop - $total) }
+      $first = $false
+      $w = [Console]::WindowWidth - 1; if ($w -lt 1) { $w = 80 }
+      Write-Host ($Title.PadRight($w))
+      Write-Host (("  ↑/↓ mover · enter confirmar").PadRight($w)) -ForegroundColor DarkGray
+      for ($i = 0; $i -lt $Options.Count; $i++) {
+        if ($i -eq $cur) { Write-Host (("  > " + $Options[$i]).PadRight($w)) -ForegroundColor Cyan }
+        else { Write-Host (("    " + $Options[$i]).PadRight($w)) }
+      }
+      $k = [Console]::ReadKey($true)
+      switch ($k.Key) {
+        'UpArrow'   { $cur = ($cur - 1 + $Options.Count) % $Options.Count }
+        'DownArrow' { $cur = ($cur + 1) % $Options.Count }
+        'Enter'     { return $cur }
+        default {
+          if ($k.KeyChar -in 'k', 'K') { $cur = ($cur - 1 + $Options.Count) % $Options.Count }
+          elseif ($k.KeyChar -in 'j', 'J') { $cur = ($cur + 1) % $Options.Count }
+        }
+      }
+    }
+  } finally { [Console]::CursorVisible = $true }
 }
 
-$selected = New-Object System.Collections.Generic.List[string]
-if ($AgentsArg -in @('a', 'all', 'todos', '*')) {
-  $Order | ForEach-Object { $selected.Add($_) }
-} else {
-  foreach ($tok in ($AgentsArg -split ',')) {
-    switch ($tok.Trim().ToLower()) {
-      { $_ -in @('1', 'claude', 'claude-code') } { $selected.Add('claude'); break }
-      { $_ -in @('2', 'cursor') }                { $selected.Add('cursor'); break }
-      { $_ -in @('3', 'codex') }                 { $selected.Add('codex'); break }
-      { $_ -in @('4', 'gemini') }                { $selected.Add('gemini'); break }
-      { $_ -in @('5', 'copilot') }               { $selected.Add('copilot'); break }
-      '' { }
-      default { Write-Warning "CLI no reconocido '$tok', se ignora." }
+function Show-MenuMulti {
+  param([string]$Title, [string[]]$Options)
+  $cur = 0; $total = $Options.Count + 2; $first = $true
+  $sel = New-Object bool[] $Options.Count
+  [Console]::CursorVisible = $false
+  try {
+    while ($true) {
+      if (-not $first) { [Console]::SetCursorPosition(0, [Console]::CursorTop - $total) }
+      $first = $false
+      $w = [Console]::WindowWidth - 1; if ($w -lt 1) { $w = 80 }
+      Write-Host ($Title.PadRight($w))
+      Write-Host (("  ↑/↓ mover · espacio marcar · enter confirmar").PadRight($w)) -ForegroundColor DarkGray
+      for ($i = 0; $i -lt $Options.Count; $i++) {
+        $box = if ($sel[$i]) { '[x]' } else { '[ ]' }
+        $line = "$box " + $Options[$i]
+        if ($i -eq $cur) { Write-Host (("  > " + $line).PadRight($w)) -ForegroundColor Cyan }
+        else { Write-Host (("    " + $line).PadRight($w)) }
+      }
+      $k = [Console]::ReadKey($true)
+      switch ($k.Key) {
+        'UpArrow'   { $cur = ($cur - 1 + $Options.Count) % $Options.Count }
+        'DownArrow' { $cur = ($cur + 1) % $Options.Count }
+        'Spacebar'  { $sel[$cur] = -not $sel[$cur] }
+        'Enter'     { if ($sel -contains $true) { return @(0..($Options.Count - 1) | Where-Object { $sel[$_] }) } }
+        default {
+          if ($k.KeyChar -in 'k', 'K') { $cur = ($cur - 1 + $Options.Count) % $Options.Count }
+          elseif ($k.KeyChar -in 'j', 'J') { $cur = ($cur + 1) % $Options.Count }
+        }
+      }
+    }
+  } finally { [Console]::CursorVisible = $true }
+}
+
+# --- Ámbito -----------------------------------------------------------------
+$Scope = $env:AKV_SCOPE
+if (-not $Scope) {
+  if ($Interactive) {
+    $idx = Show-MenuSingle "Ámbito de instalación:" @('Usuario (global, todos tus proyectos)', 'Proyecto (este repositorio)')
+    $Scope = if ($idx -eq 1) { 'project' } else { 'user' }
+  } else { $Scope = 'user' }
+}
+if ($Scope -notin @('user', 'project')) { $Scope = 'user' }
+
+# --- Selección de CLIs ------------------------------------------------------
+$selected = @()
+if ($env:AKV_AGENTS) {
+  if ($env:AKV_AGENTS -in @('a', 'all', 'todos', '*')) { $selected = $Order }
+  else {
+    foreach ($tok in ($env:AKV_AGENTS -split ',')) {
+      switch ($tok.Trim().ToLower()) {
+        { $_ -in @('1', 'claude', 'claude-code') } { $selected += 'claude' }
+        { $_ -in @('2', 'cursor') }                { $selected += 'cursor' }
+        { $_ -in @('3', 'codex') }                 { $selected += 'codex' }
+        { $_ -in @('4', 'gemini') }                { $selected += 'gemini' }
+        { $_ -in @('5', 'copilot') }               { $selected += 'copilot' }
+      }
     }
   }
+} elseif ($Interactive) {
+  $labels = $Order | ForEach-Object { $Agents[$_].label }
+  $idxs = Show-MenuMulti "¿Para qué CLIs quieres instalar el skill?" $labels
+  $selected = @($idxs | ForEach-Object { $Order[$_] })
+} else {
+  $selected = @('claude')
 }
-# Conserva el orden de $Order y elimina duplicados.
+
+# Conserva el orden canónico y elimina duplicados.
 $selected = $Order | Where-Object { $selected -contains $_ }
 if (-not $selected) { Write-Error "No se seleccionó ningún CLI. Nada que hacer."; return }
 
-# --- Método: symlink o copia ------------------------------------------------
+# --- Método -----------------------------------------------------------------
 $Method = $env:AKV_METHOD
 if (-not $Method) {
-  Write-Host ""
-  Write-Host "Método de instalación:"
-  Write-Host "  1) Symlink (recomendado): una copia canónica y el resto enlazado;"
-  Write-Host "     actualizar una actualiza todas."
-  Write-Host "  2) Copia: una copia independiente por CLI."
-  $ans = Read-Host "Elige [1]"
-  $Method = if ($ans -in @('2', 'copy', 'copia')) { 'copy' } else { 'symlink' }
+  if ($Interactive) {
+    $idx = Show-MenuSingle "Método de instalación:" @(
+      'Symlink (recomendado): una copia canónica y el resto enlazado',
+      'Copia: una copia independiente por CLI')
+    $Method = if ($idx -eq 1) { 'copy' } else { 'symlink' }
+  } else { $Method = 'symlink' }
 }
 if ($Method -ne 'copy') { $Method = 'symlink' }
 
@@ -117,7 +169,6 @@ try {
       Write-Host ("  [ok] {0}: {1}" -f $Agents[$a].label, (Join-Path $dest 'SKILL.md'))
     }
   } else {
-    # El primer CLI es la copia canónica; los demás se enlazan a ella.
     $canonical = $null
     foreach ($a in $selected) {
       if (-not $canonical) {
