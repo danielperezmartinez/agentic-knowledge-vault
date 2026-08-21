@@ -1,0 +1,20 @@
+/* Ajustes mínimos del tema. Docusaurus aporta el resto. */
+:root {
+  --ifm-color-primary: #2f6f4f;
+  --ifm-color-primary-dark: #2a643f;
+  --ifm-color-primary-darker: #285e3b;
+  --ifm-color-primary-darkest: #204d31;
+  --ifm-color-primary-light: #34785a;
+  --ifm-color-primary-lighter: #367d5e;
+  --ifm-color-primary-lightest: #3d8a68;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #5fbf93;
+  --ifm-color-primary-dark: #4bb686;
+  --ifm-color-primary-darker: #43b17f;
+  --ifm-color-primary-darkest: #379268;
+  --ifm-color-primary-light: #73c8a0;
+  --ifm-color-primary-lighter: #7dcda7;
+  --ifm-color-primary-lightest: #9bd8bc;
+}
