@@ -1,5 +1,7 @@
 # agentic-knowledge-vault
 
+**Read this in:** English · [Español](README.es.md)
+
 A portable **agent skill** that scaffolds a shared *knowledge vault* into any
 project: a single source of truth, living documentation and shared memory for the
 people **and** the CLIs/agents (Claude Code, Codex, Cursor, Gemini, Copilot…)
@@ -50,16 +52,57 @@ There is no universal cross-vendor skill format today. Installed as a
 other tools, the pointer files it generates (`AGENTS.md`, etc.) make the mounted
 system respected by any agent that reads them.
 
-## Install as a Claude Code skill
+## Installation
 
-Personal (all your projects):
+The repository **is** the skill (`SKILL.md` at its root), so installing it is
+just placing it inside a skills directory. Pick one method.
+
+### A. One command — `git clone` (simplest)
+
+Personal, available in all your Claude Code projects:
 
 ```bash
-git clone git@github.com:danielperezmartinez/agentic-knowledge-vault.git ~/.claude/skills/agentic-knowledge-vault
+git clone https://github.com/danielperezmartinez/agentic-knowledge-vault.git ~/.claude/skills/agentic-knowledge-vault
 ```
 
-Or per-project, under the repo's `.claude/skills/`. Then invoke it by name
-(`/agentic-knowledge-vault`) and follow the guided interview.
+Into a single project (run from the project root):
+
+```bash
+git clone https://github.com/danielperezmartinez/agentic-knowledge-vault.git .claude/skills/agentic-knowledge-vault
+```
+
+### B. Install script (installs or updates)
+
+The scripts clone the skill on first run and fast-forward it on later runs.
+
+macOS / Linux / Git Bash:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/danielperezmartinez/agentic-knowledge-vault/main/install.sh | bash
+```
+
+Windows PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/danielperezmartinez/agentic-knowledge-vault/main/install.ps1 | iex
+```
+
+Both install to `~/.claude/skills/` by default. To install into the current
+project instead: pass `-s -- --project` to the bash one-liner, or set
+`$env:AKV_DEST = ".claude/skills"` before the PowerShell one-liner. A custom
+target directory can be given as the first argument to `install.sh`.
+
+> The `curl … | bash` / `irm … | iex` pattern runs a remote script; both scripts
+> are short and auditable in this repo before you run them.
+
+### Updating
+
+Re-run the install script, or `git -C <install-dir> pull`.
+
+### Use it
+
+Invoke the skill by name — `/agentic-knowledge-vault` in Claude Code — and follow
+the guided interview.
 
 ## Language
 
@@ -68,4 +111,5 @@ front and is fully configurable per project).
 
 ## License
 
-_TBD._
+[MIT](LICENSE) © 2026 Daniel Pérez Martínez. Free to use, modify and
+redistribute; attribution (keeping the copyright and license notice) is required.
