@@ -57,27 +57,12 @@ hacen que el sistema montado sea respetado por cualquier agente que los lea.
 
 ## Instalación
 
-El repositorio **es** el skill (`SKILL.md` en su raíz), así que instalarlo es
-solo colocarlo dentro de una carpeta de skills. Elige un método.
+### Recomendado — instalador interactivo
 
-### A. Un comando — `git clone` (lo más simple)
-
-Personal, disponible en todos tus proyectos de Claude Code:
-
-```bash
-git clone https://github.com/danielperezmartinez/agentic-knowledge-vault.git ~/.claude/skills/agentic-knowledge-vault
-```
-
-En un proyecto concreto (desde la raíz del proyecto):
-
-```bash
-git clone https://github.com/danielperezmartinez/agentic-knowledge-vault.git .claude/skills/agentic-knowledge-vault
-```
-
-### B. Script de instalación (instala o actualiza)
-
-Los scripts clonan el skill la primera vez y lo actualizan (fast-forward) en
-ejecuciones posteriores.
+El instalador pregunta **qué ámbito** (usuario/global o el proyecto actual) y
+**para qué CLIs** quieres el skill (multi-selección), y crea el skill en el
+directorio que cada CLI seleccionado espera. Funciona tanto en local como por
+tubería.
 
 macOS / Linux / Git Bash:
 
@@ -91,17 +76,43 @@ Windows PowerShell:
 irm https://raw.githubusercontent.com/danielperezmartinez/agentic-knowledge-vault/main/install.ps1 | iex
 ```
 
-Ambos instalan en `~/.claude/skills/` por defecto. Para instalar en el proyecto
-actual: pasa `-s -- --project` al one-liner de bash, o define
-`$env:AKV_DEST = ".claude/skills"` antes del one-liner de PowerShell. Al
-`install.sh` también puedes darle una carpeta destino como primer argumento.
+CLIs soportados y dónde se coloca el skill (`<dir>/agentic-knowledge-vault/SKILL.md`):
+
+| CLI | Usuario (global) | Proyecto |
+| --- | --- | --- |
+| Claude Code | `~/.claude/skills` | `.claude/skills` |
+| Cursor | `~/.cursor/skills` | `.cursor/skills` |
+| Codex | `~/.agents/skills` | `.agents/skills` |
+| Gemini CLI | `~/.gemini/skills` | `.gemini/skills` |
+| GitHub Copilot | `~/.copilot/skills` | `.github/skills` |
+
+No interactivo (CI / automatización):
+
+```bash
+# bash: flags
+./install.sh --scope user --agents claude,cursor,codex,gemini,copilot
+./install.sh --scope project --agents all -y
+```
+
+```powershell
+# PowerShell: variables de entorno
+$env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,cursor'; irm .../install.ps1 | iex
+```
 
 > El patrón `curl … | bash` / `irm … | iex` ejecuta un script remoto; ambos
 > scripts son cortos y auditables en este repo antes de ejecutarlos.
 
+### Manual — `git clone` (solo Claude Code)
+
+Si solo usas Claude Code, basta con clonar en su carpeta de skills:
+
+```bash
+git clone https://github.com/danielperezmartinez/agentic-knowledge-vault.git ~/.claude/skills/agentic-knowledge-vault
+```
+
 ### Actualizar
 
-Reejecuta el script de instalación, o `git -C <carpeta-instalada> pull`.
+Reejecuta el instalador, o `git -C <carpeta-instalada> pull` en una copia clonada.
 
 ### Usarlo
 
