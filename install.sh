@@ -18,6 +18,7 @@ REPO_URL="https://github.com/danielperezmartinez/agentic-knowledge-vault.git"
 
 SCOPE=""
 AGENTS_ARG=""
+METHOD=""
 ASSUME_YES=0
 CLEANUP_TMP=""
 
@@ -29,10 +30,11 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --scope)   SCOPE="${2:-}"; shift 2 ;;
     --agents)  AGENTS_ARG="${2:-}"; shift 2 ;;
+    --method)  METHOD="${2:-}"; shift 2 ;;
     -y|--yes)  ASSUME_YES=1; shift ;;
     --project) SCOPE="project"; shift ;;   # atajo retrocompatible
     -h|--help)
-      echo "Uso: install.sh [--scope user|project] [--agents lista|all] [-y]"
+      echo "Uso: install.sh [--scope user|project] [--agents lista|all] [--method symlink|copy] [-y]"
       exit 0 ;;
     *) echo "Opción desconocida: $1" >&2; exit 2 ;;
   esac
@@ -117,11 +119,32 @@ case "$AGENTS_ARG" in
     IFS="$old_ifs" ;;
 esac
 
-selected="$(echo "$selected" | tr ' ' '\n' | awk 'NF' | sort -u | tr '\n' ' ')"
-if [ -z "$(echo "$selected" | tr -d ' ')" ]; then
+# Conserva el orden de $AGENT_IDS y elimina duplicados.
+ordered=""
+for a in $AGENT_IDS; do
+  case " $selected " in *" $a "*) ordered="$ordered $a" ;; esac
+done
+selected="$(echo "$ordered" | awk '{$1=$1};1')"
+if [ -z "$selected" ]; then
   echo "No se seleccionó ningún CLI. Nada que hacer." >&2
   exit 1
 fi
+
+# --- Método: symlink o copia ------------------------------------------------
+if [ -z "$METHOD" ]; then
+  {
+    echo ""
+    echo "Método de instalación:"
+    echo "  1) Symlink (recomendado): una copia canónica y el resto enlazado;"
+    echo "     actualizar una actualiza todas."
+    echo "  2) Copia: una copia independiente por CLI."
+  } > /dev/tty 2>/dev/null || true
+  case "$(ask "Elige [1]: " "1")" in
+    2|copy|copia) METHOD="copy" ;;
+    *) METHOD="symlink" ;;
+  esac
+fi
+[ "$METHOD" = "copy" ] || METHOD="symlink"
 
 # --- Origen del SKILL.md (repo local o clon temporal) -----------------------
 SRC_DIR=""
@@ -138,15 +161,42 @@ fi
 [ -f "$SRC_DIR/SKILL.md" ] || { echo "No se encontró SKILL.md en el origen." >&2; exit 1; }
 
 # --- Instalación ------------------------------------------------------------
-echo ""
-echo "Instalando '$SKILL_NAME' (ámbito: $SCOPE) en:"
-for a in $selected; do
-  dir="$(agent_dir "$a" "$SCOPE")"
-  dest="$dir/$SKILL_NAME"
+# Instala una copia real del skill en <dir>/<name> y devuelve la ruta absoluta.
+install_copy() { # install_copy <dir>
+  local dest="$1/$SKILL_NAME"
+  rm -rf "$dest" 2>/dev/null || true
   mkdir -p "$dest"
   cp "$SRC_DIR/SKILL.md" "$dest/SKILL.md"
-  echo "  ✓ $(agent_label "$a"): $dest/SKILL.md"
-done
+  ( cd "$dest" && pwd )
+}
+
+echo ""
+echo "Instalando '$SKILL_NAME' (ámbito: $SCOPE, método: $METHOD) en:"
+
+if [ "$METHOD" = "copy" ]; then
+  for a in $selected; do
+    dest="$(install_copy "$(agent_dir "$a" "$SCOPE")")"
+    echo "  ✓ $(agent_label "$a"): $dest/SKILL.md"
+  done
+else
+  # El primer CLI es la copia canónica; los demás se enlazan a ella.
+  canonical=""
+  for a in $selected; do
+    if [ -z "$canonical" ]; then
+      canonical="$(install_copy "$(agent_dir "$a" "$SCOPE")")"
+      echo "  ✓ $(agent_label "$a") (canónica): $canonical/SKILL.md"
+      continue
+    fi
+    dir="$(agent_dir "$a" "$SCOPE")"; dest="$dir/$SKILL_NAME"
+    mkdir -p "$dir"; rm -rf "$dest" 2>/dev/null || true
+    if ln -s "$canonical" "$dest" 2>/dev/null; then
+      echo "  ✓ $(agent_label "$a") (symlink): $dest -> $canonical"
+    else
+      dest="$(install_copy "$dir")"
+      echo "  ! $(agent_label "$a"): symlink no permitido; copiado en $dest/SKILL.md"
+    fi
+  done
+fi
 
 echo ""
 echo "Listo. Invócalo en el CLI correspondiente (p. ej. /$SKILL_NAME en Claude Code)."

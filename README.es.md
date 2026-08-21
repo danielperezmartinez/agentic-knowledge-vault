@@ -59,10 +59,15 @@ hacen que el sistema montado sea respetado por cualquier agente que los lea.
 
 ### Recomendado — instalador interactivo
 
-El instalador pregunta **qué ámbito** (usuario/global o el proyecto actual) y
-**para qué CLIs** quieres el skill (multi-selección), y crea el skill en el
-directorio que cada CLI seleccionado espera. Funciona tanto en local como por
-tubería.
+El instalador pregunta **qué ámbito** (usuario/global o el proyecto actual),
+**para qué CLIs** quieres el skill (multi-selección) y **qué método** — *symlink*
+(recomendado: una copia canónica y el resto enlazado, así actualizar una
+actualiza todas) o *copia* (una copia independiente por CLI). Después crea el
+skill en el directorio que cada CLI seleccionado espera. Funciona tanto en local
+como por tubería.
+
+> En Windows, los symlinks requieren Modo desarrollador (o admin); si no está
+> disponible, el instalador cae automáticamente a copia y te avisa.
 
 macOS / Linux / Git Bash:
 
@@ -90,13 +95,13 @@ No interactivo (CI / automatización):
 
 ```bash
 # bash: flags
-./install.sh --scope user --agents claude,cursor,codex,gemini,copilot
-./install.sh --scope project --agents all -y
+./install.sh --scope user --agents claude,cursor,codex,gemini,copilot --method symlink
+./install.sh --scope project --agents all --method copy -y
 ```
 
 ```powershell
 # PowerShell: variables de entorno
-$env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,cursor'; irm .../install.ps1 | iex
+$env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,cursor'; $env:AKV_METHOD='symlink'; irm .../install.ps1 | iex
 ```
 
 > El patrón `curl … | bash` / `irm … | iex` ejecuta un script remoto; ambos

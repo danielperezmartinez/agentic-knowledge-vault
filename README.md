@@ -56,9 +56,14 @@ system respected by any agent that reads them.
 
 ### Recommended — interactive installer
 
-The installer asks **which scope** (user/global or the current project) and **for
-which CLIs** you want the skill (multi-select), then creates the skill in the
-directory each selected CLI expects. It works run locally or piped.
+The installer asks **which scope** (user/global or the current project), **for
+which CLIs** you want the skill (multi-select), and **which method** — *symlink*
+(recommended: one canonical copy, the rest linked to it, so updating one updates
+all) or *copy* (an independent copy per CLI). It then creates the skill in the
+directory each selected CLI expects. Works run locally or piped.
+
+> On Windows, symlinks need Developer Mode (or admin); if unavailable the
+> installer falls back to a copy automatically and tells you.
 
 macOS / Linux / Git Bash:
 
@@ -86,13 +91,13 @@ Non-interactive (CI / automation):
 
 ```bash
 # bash: flags
-./install.sh --scope user --agents claude,cursor,codex,gemini,copilot
-./install.sh --scope project --agents all -y
+./install.sh --scope user --agents claude,cursor,codex,gemini,copilot --method symlink
+./install.sh --scope project --agents all --method copy -y
 ```
 
 ```powershell
 # PowerShell: environment variables
-$env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,cursor'; irm .../install.ps1 | iex
+$env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,cursor'; $env:AKV_METHOD='symlink'; irm .../install.ps1 | iex
 ```
 
 > The `curl … | bash` / `irm … | iex` pattern runs a remote script; both scripts

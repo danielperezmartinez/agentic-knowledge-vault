@@ -66,8 +66,22 @@ if ($AgentsArg -in @('a', 'all', 'todos', '*')) {
     }
   }
 }
-$selected = $selected | Select-Object -Unique
+# Conserva el orden de $Order y elimina duplicados.
+$selected = $Order | Where-Object { $selected -contains $_ }
 if (-not $selected) { Write-Error "No se seleccionó ningún CLI. Nada que hacer."; return }
+
+# --- Método: symlink o copia ------------------------------------------------
+$Method = $env:AKV_METHOD
+if (-not $Method) {
+  Write-Host ""
+  Write-Host "Método de instalación:"
+  Write-Host "  1) Symlink (recomendado): una copia canónica y el resto enlazado;"
+  Write-Host "     actualizar una actualiza todas."
+  Write-Host "  2) Copia: una copia independiente por CLI."
+  $ans = Read-Host "Elige [1]"
+  $Method = if ($ans -in @('2', 'copy', 'copia')) { 'copy' } else { 'symlink' }
+}
+if ($Method -ne 'copy') { $Method = 'symlink' }
 
 # --- Origen del SKILL.md (repo local o clon temporal) -----------------------
 $TmpDir = $null
@@ -85,16 +99,46 @@ $SrcSkill = Join-Path $SrcDir 'SKILL.md'
 if (-not (Test-Path $SrcSkill)) { Write-Error "No se encontró SKILL.md en el origen."; return }
 
 # --- Instalación ------------------------------------------------------------
+function Install-Copy([string]$dir) {
+  $dest = Join-Path $dir $SkillName
+  if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
+  New-Item -ItemType Directory -Force -Path $dest | Out-Null
+  Copy-Item $SrcSkill (Join-Path $dest 'SKILL.md') -Force
+  return (Resolve-Path $dest).Path
+}
+
 try {
   Write-Host ""
-  Write-Host "Instalando '$SkillName' (ámbito: $Scope) en:"
-  foreach ($a in $selected) {
-    $dir  = $Agents[$a].$Scope
-    $dest = Join-Path $dir $SkillName
-    New-Item -ItemType Directory -Force -Path $dest | Out-Null
-    Copy-Item $SrcSkill (Join-Path $dest 'SKILL.md') -Force
-    Write-Host ("  [ok] {0}: {1}" -f $Agents[$a].label, (Join-Path $dest 'SKILL.md'))
+  Write-Host "Instalando '$SkillName' (ámbito: $Scope, método: $Method) en:"
+
+  if ($Method -eq 'copy') {
+    foreach ($a in $selected) {
+      $dest = Install-Copy $Agents[$a].$Scope
+      Write-Host ("  [ok] {0}: {1}" -f $Agents[$a].label, (Join-Path $dest 'SKILL.md'))
+    }
+  } else {
+    # El primer CLI es la copia canónica; los demás se enlazan a ella.
+    $canonical = $null
+    foreach ($a in $selected) {
+      if (-not $canonical) {
+        $canonical = Install-Copy $Agents[$a].$Scope
+        Write-Host ("  [ok] {0} (canónica): {1}" -f $Agents[$a].label, (Join-Path $canonical 'SKILL.md'))
+        continue
+      }
+      $dir  = $Agents[$a].$Scope
+      $dest = Join-Path $dir $SkillName
+      New-Item -ItemType Directory -Force -Path $dir | Out-Null
+      if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
+      try {
+        New-Item -ItemType SymbolicLink -Path $dest -Target $canonical -ErrorAction Stop | Out-Null
+        Write-Host ("  [ok] {0} (symlink): {1} -> {2}" -f $Agents[$a].label, $dest, $canonical)
+      } catch {
+        $dest = Install-Copy $dir
+        Write-Warning ("{0}: symlink no permitido (activa el Modo desarrollador); copiado en {1}" -f $Agents[$a].label, (Join-Path $dest 'SKILL.md'))
+      }
+    }
   }
+
   Write-Host ""
   Write-Host "Listo. Invócalo en el CLI correspondiente (p. ej. /$SkillName en Claude Code)."
 } finally {
