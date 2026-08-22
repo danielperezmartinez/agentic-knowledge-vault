@@ -64,7 +64,9 @@ Según el resultado:
   README base. **Lee el README e `Inicio` existentes** para conocer los parámetros
   reales (ruta de la bóveda, idioma, nombre del proyecto) y qué sistemas ya están
   montados; NO los vuelvas a preguntar. Luego:
-  1. Haz solo la **Pregunta 2**, limitada a los sistemas que **aún no existen**.
+  1. Haz solo la **Pregunta 2b**, limitada a los sistemas que **aún no existen**
+     (NO hagas la compuerta 2a: la base ya está montada y el usuario reinvoca
+     precisamente para añadir sistemas).
   2. Si el sistema nuevo necesita definir contenido, aplica la **Pregunta 3**
      (rellenar ahora o dejar plantilla) solo para ese sistema.
   3. Ejecuta únicamente el paso de construcción del/los sistema(s) elegido(s).
@@ -96,17 +98,48 @@ Puede ser más de uno: crea uno por cada herramienta seleccionada, todos con el
 - **Claude Code** → `CLAUDE.md`
 - **Codex (OpenAI)** → `AGENTS.md`
 - **Cursor** → `AGENTS.md` (o `.cursor/rules/*.mdc` si el usuario lo prefiere)
-- **Gemini CLI** → `GEMINI.md`
+- **Antigravity CLI (agy, terminal)** → `GEMINI.md`
 - **GitHub Copilot** → `.github/copilot-instructions.md`
 - **Otro** → pregunta qué fichero de instrucciones lee esa herramienta y créalo.
 
 Si dos herramientas comparten fichero (p. ej. Codex y Cursor usan `AGENTS.md`),
 se crea una sola vez. Todos los punteros son idénticos entre sí.
 
-### Pregunta 2 — Sistemas a montar (selección múltiple) · _ambos modos_
+### Pregunta 2 — Sistemas a montar · _partida en dos: 2a compuerta + 2b sistemas_
 
-En modo ampliación, ofrece solo los sistemas que aún no estén montados.
+**Concepto clave que debes tener claro antes de preguntar:** la **base
+compartida** (punteros + `README.md` + `Inicio.md`) se monta **siempre** — es el
+núcleo del skill. Los sistemas de conocimiento (Tareas, ADR, etc.) son añadidos
+**opcionales encima** de esa base. Por tanto **"cero sistemas" es una respuesta
+legítima y completa**: significa montar solo la base compartida entre CLIs. Este
+mismo repo es un ejemplo de ese estado final (su `README.md` lista "ningún
+sistema montado").
 
+Por eso la pregunta se hace en **dos pasos**, para no depender de que el usuario
+"deje vacía" una selección múltiple (eso es ambiguo y **nunca** debe interpretarse
+como que falta respuesta).
+
+#### Pregunta 2a — Compuerta (selección única, 2 opciones) · _solo montaje inicial_
+
+Pregunta primero el alcance:
+
+- **Solo la base compartida (sin sistemas)** — monta únicamente el mecanismo de
+  memoria compartida entre CLIs/agentes. Es una opción de primera clase, no un
+  "no sé".
+- **Montar también sistemas de conocimiento** — además de la base, uno o más
+  sistemas; continúa con la Pregunta 2b.
+
+Si elige **"Solo la base compartida"**: ejecuta **solo los pasos 1, 2, 3, 8
+(opcional) y 9**; deja la sección "Sistemas disponibles" del README indicando que
+aún no hay sistemas montados (como en este repo) y en `Inicio` lista bajo
+"Próximos sistemas" los que podrían añadirse reinvocando el skill en modo
+ampliación. **No hagas la Pregunta 2b ni ninguna pregunta de sistemas.** Da el
+montaje por terminado; no reabras la decisión.
+
+#### Pregunta 2b — Qué sistemas (selección múltiple) · _ambos modos_
+
+Solo si en 2a eligió montar sistemas (o si estás en modo ampliación). En modo
+ampliación, ofrece solo los sistemas que aún no estén montados.
 
 - **Tareas** — gestión de trabajos como notas con estado. *Recomendado en la
   mayoría de proyectos, pero opcional.*
@@ -118,6 +151,14 @@ En modo ampliación, ofrece solo los sistemas que aún no estén montados.
 - **Catálogo técnico** — superficie pública reutilizable (UI, servicios,
   contratos). Carpeta de notas estructuradas por pieza + `.base` + nota-índice.
 - **Otros** — pregunta libre por sistemas adicionales que el usuario quiera.
+
+> **Regla defensiva (obligatoria).** Si en cualquier momento la respuesta de
+> sistemas vuelve **vacía** (el usuario no seleccionó ninguno), **no reintentes ni
+> vuelvas a preguntar en bucle**: interprétala como "solo la base compartida",
+> confírmalo en una sola frase ("Monto solo la base compartida, sin sistemas,
+> ¿de acuerdo?") y procede con el camino de "solo la base" descrito en 2a. En modo
+> ampliación, una respuesta vacía significa que no se añade ningún sistema:
+> informa de ello y termina sin cambios.
 
 ### Pregunta 3 — ¿Rellenar el andamio ahora o dejarlo como plantilla? · _ambos modos_
 
@@ -294,7 +335,7 @@ visuales, Catálogo técnico...), solo con el enlace a su .base o nota-índice. 
 
 ## Paso 4 — Sistema de Tareas (opcional)
 
-Móntalo solo si el usuario lo eligió en la Pregunta 2. Crea la carpeta
+Móntalo solo si el usuario lo eligió en la Pregunta 2b. Crea la carpeta
 `{{BÓVEDA}}/Tareas/` con:
 
 ### 4a. Plantilla de nota de tarea
