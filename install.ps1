@@ -8,6 +8,9 @@
 # No interactivo (variables de entorno):
 #   $env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,codex'; $env:AKV_METHOD='symlink'; irm .../install.ps1 | iex
 #
+# Actualizar lo ya instalado (detecta CLIs y ámbito automáticamente y actualiza todo):
+#   $env:AKV_ACTION='update'; irm .../install.ps1 | iex
+#
 # Cada CLI escribe en su carpeta nativa y, además, siempre en el hub compartido
 # .agents/skills (que varios CLIs leen). Para proyectos en otra unidad que tu
 # perfil (p. ej. P:\) usa ámbito proyecto.
@@ -94,6 +97,20 @@ function Show-MenuMulti {
   } finally { [Console]::CursorVisible = $true }
 }
 
+# --- Acción: instalar o actualizar ------------------------------------------
+$Action = $env:AKV_ACTION
+if ($Action) { $Action = $Action.Trim().ToLower() }
+if     ($Action -in @('update', 'actualizar', 'u')) { $Action = 'update' }
+elseif ($Action -in @('install', 'instalar', 'i'))  { $Action = 'install' }
+elseif ($Interactive) {
+  $idx = Show-MenuSingle "¿Qué quieres hacer?" @('Instalar', 'Actualizar instalaciones existentes')
+  $Action = if ($idx -eq 1) { 'update' } else { 'install' }
+} else { $Action = 'install' }
+
+# Las preguntas de ámbito, CLIs y método solo aplican al instalar. Al actualizar
+# se detectan automáticamente las instalaciones existentes (ver bloque try).
+if ($Action -eq 'install') {
+
 # --- Ámbito -----------------------------------------------------------------
 $Scope = $env:AKV_SCOPE
 if (-not $Scope) {
@@ -142,21 +159,22 @@ if (-not $Method) {
 }
 if ($Method -ne 'copy') { $Method = 'symlink' }
 
+} # fin del bloque solo-instalar
+
 # --- Origen del SKILL.md (repo local o clon temporal) -----------------------
 # El skill vive en skills/<name>/SKILL.md (estructura de plugin).
-$Rel = Join-Path 'skills' (Join-Path $SkillName 'SKILL.md')
 $TmpDir = $null
-if (Test-Path $Rel) {
-  $SrcSkill = (Resolve-Path $Rel).Path
-} elseif ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot $Rel))) {
-  $SrcSkill = (Resolve-Path (Join-Path $PSScriptRoot $Rel)).Path
-} else {
-  $TmpDir = Join-Path ([System.IO.Path]::GetTempPath()) ("akv-" + [System.Guid]::NewGuid().ToString('N'))
+function Get-SourceSkill {
+  $rel = Join-Path 'skills' (Join-Path $SkillName 'SKILL.md')
+  if (Test-Path $rel) { return (Resolve-Path $rel).Path }
+  if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot $rel))) { return (Resolve-Path (Join-Path $PSScriptRoot $rel)).Path }
+  $script:TmpDir = Join-Path ([System.IO.Path]::GetTempPath()) ("akv-" + [System.Guid]::NewGuid().ToString('N'))
   Write-Host "Descargando el skill…"
-  git clone --depth 1 $RepoUrl $TmpDir *> $null
-  $SrcSkill = Join-Path $TmpDir $Rel
+  git clone --depth 1 $RepoUrl $script:TmpDir *> $null
+  $s = Join-Path $script:TmpDir $rel
+  if (-not (Test-Path $s)) { throw "No se encontró SKILL.md en el origen." }
+  return $s
 }
-if (-not (Test-Path $SrcSkill)) { Write-Error "No se encontró SKILL.md en el origen."; return }
 
 # --- Instalación ------------------------------------------------------------
 function Install-Copy([string]$dir) {
@@ -168,6 +186,36 @@ function Install-Copy([string]$dir) {
 }
 
 try {
+  if ($Action -eq 'update') {
+    $locs = @()
+    foreach ($a in $Order) {
+      foreach ($sc in @('user', 'project')) {
+        $skdir  = Join-Path $Agents[$a].$sc $SkillName
+        $skfile = Join-Path $skdir 'SKILL.md'
+        if (Test-Path $skfile) { $locs += [pscustomobject]@{ agent = $a; scope = $sc; dir = $skdir; file = $skfile } }
+      }
+    }
+    if (-not $locs) {
+      Write-Host "No se encontró ninguna instalación de '$SkillName' (ni en ámbito usuario, ni de proyecto en este directorio)."
+      Write-Host "Ejecuta de nuevo y elige «Instalar»."
+      return
+    }
+    $SrcSkill = Get-SourceSkill
+    Write-Host ""
+    Write-Host "Actualizando instalaciones existentes de '$SkillName':"
+    foreach ($l in $locs) {
+      Copy-Item $SrcSkill $l.file -Force
+      $isLink = $false
+      try { $isLink = ((Get-Item $l.dir -Force).LinkType -eq 'SymbolicLink') } catch { }
+      $tag = if ($isLink) { 'symlink -> canónica' } else { 'copia' }
+      Write-Host ("  [ok] {0} [{1}] ({2}): {3}" -f $Agents[$l.agent].label, $l.scope, $tag, $l.file)
+    }
+    Write-Host ""
+    Write-Host "Actualización completa."
+    return
+  }
+
+  $SrcSkill = Get-SourceSkill
   Write-Host ""
   Write-Host "Instalando '$SkillName' (ámbito: $Scope, método: $Method) en:"
 

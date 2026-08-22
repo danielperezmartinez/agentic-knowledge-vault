@@ -71,9 +71,12 @@ filesystem skill folders), and it also works in the Claude Code terminal:
 ### Other CLIs — interactive installer
 
 For Codex, Antigravity CLI (`agy`), Cursor, GitHub Copilot — and the Claude Code
-terminal, if you prefer files over the plugin — use the installer. It asks
-**scope** (user/project), **which CLIs** (multi-select), and **method** —
-*symlink* (recommended) or *copy* — then writes the skill into each CLI's folder.
+terminal, if you prefer files over the plugin — use the installer. It first asks
+whether to **install** or **update**. For a fresh install it then asks **scope**
+(user/project), **which CLIs** (multi-select), and **method** — *symlink*
+(recommended) or *copy* — and writes the skill into each CLI's folder. **Update**
+skips those questions: it auto-detects where the skill is already installed and
+refreshes every copy (see *Updating* below).
 
 macOS / Linux / Git Bash:
 
@@ -119,11 +122,13 @@ Non-interactive (CI / automation):
 # bash: flags
 ./install.sh --scope user --agents claude,cursor,codex,antigravity,copilot --method symlink
 ./install.sh --scope project --agents all --method copy -y
+./install.sh --update   # refresh existing installs (auto-detects CLIs and scope)
 ```
 
 ```powershell
 # PowerShell: environment variables
 $env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,cursor'; $env:AKV_METHOD='symlink'; irm .../install.ps1 | iex
+$env:AKV_ACTION='update'; irm .../install.ps1 | iex   # refresh existing installs
 ```
 
 > The `curl … | bash` / `irm … | iex` pattern runs a remote script; both scripts
@@ -133,9 +138,12 @@ $env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,cursor'; $env:AKV_METHOD='symlink
 
 - **Plugin (Claude)** — `/plugin marketplace update danielperezmartinez`, then
   reinstall the plugin if a new version is offered.
-- **Installer (symlink)** — re-run the installer; only the canonical copy changes
-  and every linked CLI sees it.
-- **Installer (copy)** — re-run the installer to refresh each CLI's copy.
+- **Installer** — run it and choose **Update** (or `./install.sh --update` /
+  `$env:AKV_ACTION='update'`). It auto-detects every place the skill is installed
+  — across CLIs and both scopes (project scope is detected from the current
+  directory) — and refreshes them all: symlinked copies update through their
+  canonical file, plain copies are overwritten in place. If nothing is found it
+  says so and does nothing.
 
 ### Use it
 

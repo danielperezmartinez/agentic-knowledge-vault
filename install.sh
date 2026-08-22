@@ -9,6 +9,9 @@
 #   ./install.sh --scope user --agents claude,cursor,codex,antigravity,copilot --method symlink
 #   ./install.sh --scope project --agents all --method copy -y
 #
+# Actualizar lo ya instalado (detecta CLIs y ámbito automáticamente y actualiza todo):
+#   ./install.sh --update
+#
 # Cada CLI escribe en su carpeta nativa y, además, siempre en el hub compartido
 # .agents/skills (que varios CLIs leen). Para proyectos en otra unidad que tu
 # perfil (p. ej. P:\ en Windows) usa --scope project.
@@ -20,6 +23,7 @@ REPO_URL="https://github.com/danielperezmartinez/agentic-knowledge-vault.git"
 SCOPE=""
 AGENTS_ARG=""
 METHOD=""
+ACTION=""
 ASSUME_YES=0
 CLEANUP_TMP=""
 STTY_SAVE=""
@@ -40,10 +44,13 @@ while [ $# -gt 0 ]; do
     --scope)   SCOPE="${2:-}"; shift 2 ;;
     --agents)  AGENTS_ARG="${2:-}"; shift 2 ;;
     --method)  METHOD="${2:-}"; shift 2 ;;
+    --action)  ACTION="${2:-}"; shift 2 ;;
+    --update)  ACTION="update"; shift ;;
     -y|--yes)  ASSUME_YES=1; shift ;;
     --project) SCOPE="project"; shift ;;
     -h|--help)
-      echo "Uso: install.sh [--scope user|project] [--agents lista|all] [--method symlink|copy] [-y]"
+      echo "Uso: install.sh [--action install|update] [--scope user|project] [--agents lista|all] [--method symlink|copy] [-y]"
+      echo "     install.sh --update   # actualiza las instalaciones existentes (autodetecta CLIs y ámbito)"
       exit 0 ;;
     *) echo "Opción desconocida: $1" >&2; exit 2 ;;
   esac
@@ -153,6 +160,21 @@ menu_multi() {
   for i in $(seq 0 $((n-1))); do [ "${sel[$i]}" -eq 1 ] && MENU_LIST="$MENU_LIST $i"; done
 }
 
+# --- Acción: instalar o actualizar ------------------------------------------
+case "$(echo "$ACTION" | tr 'A-Z' 'a-z')" in
+  update|actualizar|u) ACTION="update" ;;
+  install|instalar|i)  ACTION="install" ;;
+  "") if [ "$interactive" -eq 1 ]; then
+        menu_single "¿Qué quieres hacer?" "Instalar" "Actualizar instalaciones existentes"
+        [ "$MENU_INDEX" -eq 1 ] && ACTION="update" || ACTION="install"
+      else ACTION="install"; fi ;;
+  *) ACTION="install" ;;
+esac
+
+# El ámbito, los CLIs y el método solo se preguntan al instalar. Al actualizar se
+# detectan las instalaciones existentes más abajo.
+if [ "$ACTION" = "install" ]; then
+
 # --- Ámbito -----------------------------------------------------------------
 if [ -z "$SCOPE" ]; then
   if [ "$interactive" -eq 1 ]; then
@@ -203,21 +225,25 @@ if [ -z "$METHOD" ]; then
 fi
 [ "$METHOD" = "copy" ] || METHOD="symlink"
 
+fi # fin del bloque solo-instalar
+
 # --- Origen del SKILL.md (repo local o clon temporal) -----------------------
 # El skill vive en skills/<name>/SKILL.md (estructura de plugin).
-REL="skills/$SKILL_NAME/SKILL.md"
 SRC_SKILL=""
-if [ -f "$REL" ]; then
-  SRC_SKILL="$(cd "$(dirname "$REL")" && pwd)/SKILL.md"
-elif [ -n "${BASH_SOURCE:-}" ] && [ -f "$(dirname "${BASH_SOURCE:-}")/$REL" ]; then
-  SRC_SKILL="$(cd "$(dirname "${BASH_SOURCE}")/skills/$SKILL_NAME" && pwd)/SKILL.md"
-else
-  CLEANUP_TMP="$(mktemp -d)"
-  echo "Descargando el skill…"
-  git clone --depth 1 "$REPO_URL" "$CLEANUP_TMP" >/dev/null 2>&1
-  SRC_SKILL="$CLEANUP_TMP/$REL"
-fi
-[ -f "$SRC_SKILL" ] || { echo "No se encontró SKILL.md en el origen." >&2; exit 1; }
+resolve_source() {
+  rel="skills/$SKILL_NAME/SKILL.md"
+  if [ -f "$rel" ]; then
+    SRC_SKILL="$(cd "$(dirname "$rel")" && pwd)/SKILL.md"
+  elif [ -n "${BASH_SOURCE:-}" ] && [ -f "$(dirname "${BASH_SOURCE:-}")/$rel" ]; then
+    SRC_SKILL="$(cd "$(dirname "${BASH_SOURCE}")/skills/$SKILL_NAME" && pwd)/SKILL.md"
+  else
+    CLEANUP_TMP="$(mktemp -d)"
+    echo "Descargando el skill…"
+    git clone --depth 1 "$REPO_URL" "$CLEANUP_TMP" >/dev/null 2>&1
+    SRC_SKILL="$CLEANUP_TMP/$rel"
+  fi
+  [ -f "$SRC_SKILL" ] || { echo "No se encontró SKILL.md en el origen." >&2; exit 1; }
+}
 
 # --- Instalación ------------------------------------------------------------
 install_copy() { # install_copy <dir> -> ruta absoluta del skill
@@ -228,6 +254,36 @@ install_copy() { # install_copy <dir> -> ruta absoluta del skill
   ( cd "$dest" && pwd )
 }
 
+# --- Actualización de instalaciones existentes ------------------------------
+if [ "$ACTION" = "update" ]; then
+  locs=""
+  for a in $AGENT_ARR; do
+    for sc in user project; do
+      skdir="$(native_dir "$a" "$sc")/$SKILL_NAME"
+      [ -f "$skdir/SKILL.md" ] && locs="$locs $a:$sc"
+    done
+  done
+  if [ -z "$(echo "$locs" | awk '{$1=$1};1')" ]; then
+    echo "No se encontró ninguna instalación de '$SKILL_NAME' (ni en ámbito usuario, ni de proyecto en este directorio)." >&2
+    echo "Ejecuta de nuevo y elige «Instalar»." >&2
+    exit 0
+  fi
+  resolve_source
+  echo ""
+  echo "Actualizando instalaciones existentes de '$SKILL_NAME':"
+  for tok in $locs; do
+    a="${tok%%:*}"; sc="${tok##*:}"
+    skdir="$(native_dir "$a" "$sc")/$SKILL_NAME"
+    cp "$SRC_SKILL" "$skdir/SKILL.md"
+    if [ -L "$skdir" ]; then tag="symlink -> canónica"; else tag="copia"; fi
+    echo "  ✓ $(agent_label "$a") [$sc] ($tag): $skdir/SKILL.md"
+  done
+  echo ""
+  echo "Actualización completa."
+  exit 0
+fi
+
+resolve_source
 echo ""
 echo "Instalando '$SKILL_NAME' (ámbito: $SCOPE, método: $METHOD) en:"
 

@@ -74,9 +74,13 @@ skills de disco), y también funciona en el terminal de Claude Code:
 ### Otros CLIs — instalador interactivo
 
 Para Codex, Antigravity CLI (`agy`), Cursor, GitHub Copilot — y el terminal de
-Claude Code, si prefieres ficheros al plugin — usa el instalador. Pregunta
-**ámbito** (usuario/proyecto), **qué CLIs** (multi-selección) y **método** —
-*symlink* (recomendado) o *copia* — y escribe el skill en la carpeta de cada CLI.
+Claude Code, si prefieres ficheros al plugin — usa el instalador. Primero
+pregunta si quieres **instalar** o **actualizar**. Para una instalación nueva
+pregunta luego **ámbito** (usuario/proyecto), **qué CLIs** (multi-selección) y
+**método** — *symlink* (recomendado) o *copia* — y escribe el skill en la carpeta
+de cada CLI. **Actualizar** se salta esas preguntas: detecta automáticamente
+dónde está ya instalado el skill y refresca todas las copias (ver *Actualizar*
+más abajo).
 
 macOS / Linux / Git Bash:
 
@@ -123,11 +127,13 @@ No interactivo (CI / automatización):
 # bash: flags
 ./install.sh --scope user --agents claude,cursor,codex,antigravity,copilot --method symlink
 ./install.sh --scope project --agents all --method copy -y
+./install.sh --update   # actualiza lo ya instalado (autodetecta CLIs y ámbito)
 ```
 
 ```powershell
 # PowerShell: variables de entorno
 $env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,cursor'; $env:AKV_METHOD='symlink'; irm .../install.ps1 | iex
+$env:AKV_ACTION='update'; irm .../install.ps1 | iex   # actualiza lo ya instalado
 ```
 
 > El patrón `curl … | bash` / `irm … | iex` ejecuta un script remoto; ambos
@@ -137,10 +143,12 @@ $env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,cursor'; $env:AKV_METHOD='symlink
 
 - **Plugin (Claude)** — `/plugin marketplace update danielperezmartinez` y
   reinstala el plugin si ofrece versión nueva.
-- **Instalador (symlink)** — reejecuta el instalador; solo cambia la copia
-  canónica y todos los CLIs enlazados la ven.
-- **Instalador (copia)** — reejecuta el instalador para refrescar la copia de
-  cada CLI.
+- **Instalador** — ejecútalo y elige **Actualizar** (o `./install.sh --update` /
+  `$env:AKV_ACTION='update'`). Detecta automáticamente cada sitio donde el skill
+  está instalado — en todos los CLIs y ambos ámbitos (el de proyecto se detecta
+  desde el directorio actual) — y los refresca todos: las copias enlazadas por
+  symlink se actualizan a través de su fichero canónico, y las copias planas se
+  sobrescriben en su sitio. Si no encuentra nada, lo dice y no hace nada.
 
 ### Usarlo
 
