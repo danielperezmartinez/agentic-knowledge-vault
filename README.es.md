@@ -81,9 +81,8 @@ Windows PowerShell:
 irm https://raw.githubusercontent.com/danielperezmartinez/agentic-knowledge-vault/main/install.ps1 | iex
 ```
 
-Cada CLI seleccionado se instala en su carpeta **nativa** **y** en el hub neutral
-compartido `.agents/skills` (que varios CLIs también leen). Los ficheros quedan en
-`<dir>/agentic-knowledge-vault/SKILL.md`.
+Cada CLI seleccionado se instala en la carpeta que ese CLI lee. Los ficheros
+quedan en `<dir>/agentic-knowledge-vault/SKILL.md`.
 
 | CLI | Usuario (global) | Proyecto |
 | --- | --- | --- |
@@ -92,17 +91,19 @@ compartido `.agents/skills` (que varios CLIs también leen). Los ficheros quedan
 | Codex | `~/.codex/skills` | `.agents/skills` |
 | Antigravity CLI (`agy`) | `~/.gemini/skills` | `.gemini/skills` |
 | GitHub Copilot | `~/.copilot/skills` | `.github/skills` |
-| *(siempre, hub compartido)* | `~/.agents/skills` | `.agents/skills` |
 
 > **El descubrimiento es por herramienta e incluso por superficie.** El *mismo*
-> producto suele leer una carpeta distinta en su terminal que en su app de
-> escritorio, y algunos CLIs encuentran `.agents/skills` solo **subiendo** desde
-> el proyecto (así que una instalación de usuario en tu home solo les llega para
-> proyectos que cuelgan de tu carpeta de usuario). Por eso **ninguna instalación
-> de ámbito usuario cubre todas las superficies**. El único método fiable e
-> independiente de la unidad es la instalación de ámbito **proyecto** en cada
-> repo — muy recomendada si tus proyectos viven en una unidad distinta a la de tu
-> perfil (habitual en Windows, p. ej. `P:\`).
+> producto suele leer una carpeta distinta en terminal que en su app de
+> escritorio: p. ej. **Claude Code** (terminal) lee solo `~/.claude/skills`,
+> mientras que la **app de escritorio de Claude** no usa estas carpetas de disco
+> — usa las skills habilitadas en tu cuenta de claude.ai (Customize). Algunos
+> CLIs encuentran `.agents/skills` solo **subiendo** desde el proyecto, así que
+> una instalación de usuario en tu home solo les llega para proyectos que cuelgan
+> de tu carpeta de usuario. Por eso **ninguna instalación de ámbito usuario cubre
+> todas las superficies**. El único método fiable e independiente de la unidad es
+> la instalación de ámbito **proyecto** en cada repo — muy recomendada si tus
+> proyectos viven en una unidad distinta a la de tu perfil (habitual en Windows,
+> p. ej. `P:\`).
 
 No interactivo (CI / automatización):
 

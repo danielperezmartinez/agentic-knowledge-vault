@@ -77,8 +77,7 @@ Windows PowerShell:
 irm https://raw.githubusercontent.com/danielperezmartinez/agentic-knowledge-vault/main/install.ps1 | iex
 ```
 
-Each selected CLI is installed into its **native** folder **and** into the shared
-vendor-neutral `.agents/skills` hub (which several tools also read). Files land at
+Each selected CLI is installed into the folder it reads. Files land at
 `<dir>/agentic-knowledge-vault/SKILL.md`.
 
 | CLI | User (global) | Project |
@@ -88,16 +87,18 @@ vendor-neutral `.agents/skills` hub (which several tools also read). Files land 
 | Codex | `~/.codex/skills` | `.agents/skills` |
 | Antigravity CLI (`agy`) | `~/.gemini/skills` | `.gemini/skills` |
 | GitHub Copilot | `~/.copilot/skills` | `.github/skills` |
-| *(always, shared hub)* | `~/.agents/skills` | `.agents/skills` |
 
 > **Discovery is per-tool and even per-surface.** The *same* product often reads
-> a different folder in its terminal vs. its desktop app, and some tools find
-> `.agents/skills` only by walking **up** from the project folder (so a
-> home-based user install reaches them only for projects under your home
-> directory). Because of this, **no single user-scope install covers every
-> surface**. The one reliable, drive-independent method is a **project-scope**
-> install in each repo — strongly recommended when your projects live on a
-> different drive than your user profile (common on Windows, e.g. `P:\`).
+> a different folder in its terminal vs. its desktop app: e.g. **Claude Code**
+> (terminal) reads only `~/.claude/skills`, while the **Claude desktop app** does
+> not use these filesystem folders at all — it uses the skills enabled for your
+> claude.ai account (Customize). Some tools find `.agents/skills` only by walking
+> **up** from the project folder, so a home-based user install reaches them only
+> for projects under your home directory. Because of this, **no single user-scope
+> install covers every surface**. The one reliable, drive-independent method is a
+> **project-scope** install in each repo — strongly recommended when your
+> projects live on a different drive than your user profile (common on Windows,
+> e.g. `P:\`).
 
 Non-interactive (CI / automation):
 

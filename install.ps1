@@ -26,7 +26,6 @@ $Agents = [ordered]@{
   copilot     = @{ label = 'GitHub Copilot';        user = "$HOME/.copilot/skills"; project = ".github/skills" }
 }
 $Order = @('claude', 'cursor', 'codex', 'antigravity', 'copilot')
-function Neutral-Dir($scope) { if ($scope -eq 'project') { ".agents/skills" } else { "$HOME/.agents/skills" } }
 
 try { $Interactive = -not [Console]::IsInputRedirected } catch { $Interactive = $false }
 
@@ -141,12 +140,6 @@ if (-not $Method) {
 }
 if ($Method -ne 'copy') { $Method = 'symlink' }
 
-# --- Carpetas destino (nativas + hub neutral), sin duplicados ---------------
-$dirs = @()
-foreach ($a in $selected) { $dirs += $Agents[$a].$Scope }
-$dirs += (Neutral-Dir $Scope)
-$dirs = $dirs | Select-Object -Unique
-
 # --- Origen del SKILL.md (repo local o clon temporal) -----------------------
 $TmpDir = $null
 if (Test-Path 'SKILL.md') {
@@ -173,32 +166,31 @@ function Install-Copy([string]$dir) {
 
 try {
   Write-Host ""
-  Write-Host "Instalando '$SkillName' (ámbito: $Scope, método: $Method)"
-  Write-Host ("CLIs: " + ($selected -join ', '))
-  Write-Host "en estas carpetas:"
+  Write-Host "Instalando '$SkillName' (ámbito: $Scope, método: $Method) en:"
 
   if ($Method -eq 'copy') {
-    foreach ($d in $dirs) {
-      $dest = Install-Copy $d
-      Write-Host ("  [ok] " + (Join-Path $dest 'SKILL.md'))
+    foreach ($a in $selected) {
+      $dest = Install-Copy $Agents[$a].$Scope
+      Write-Host ("  [ok] {0}: {1}" -f $Agents[$a].label, (Join-Path $dest 'SKILL.md'))
     }
   } else {
     $canonical = $null
-    foreach ($d in $dirs) {
+    foreach ($a in $selected) {
+      $dir = $Agents[$a].$Scope
       if (-not $canonical) {
-        $canonical = Install-Copy $d
-        Write-Host ("  [ok] (canónica) " + (Join-Path $canonical 'SKILL.md'))
+        $canonical = Install-Copy $dir
+        Write-Host ("  [ok] {0} (canónica): {1}" -f $Agents[$a].label, (Join-Path $canonical 'SKILL.md'))
         continue
       }
-      $dest = Join-Path $d $SkillName
-      New-Item -ItemType Directory -Force -Path $d | Out-Null
+      $dest = Join-Path $dir $SkillName
+      New-Item -ItemType Directory -Force -Path $dir | Out-Null
       if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
       try {
         New-Item -ItemType SymbolicLink -Path $dest -Target $canonical -ErrorAction Stop | Out-Null
-        Write-Host ("  [ok] (symlink)  {0} -> {1}" -f $dest, $canonical)
+        Write-Host ("  [ok] {0} (symlink): {1} -> {2}" -f $Agents[$a].label, $dest, $canonical)
       } catch {
-        $dest = Install-Copy $d
-        Write-Warning ("symlink no permitido (activa el Modo desarrollador); copiado en " + (Join-Path $dest 'SKILL.md'))
+        $dest = Install-Copy $dir
+        Write-Warning ("{0}: symlink no permitido (activa el Modo desarrollador); copiado en {1}" -f $Agents[$a].label, (Join-Path $dest 'SKILL.md'))
       }
     }
   }

@@ -71,8 +71,6 @@ native_dir() { case "$1:$2" in
   copilot:user)        echo "$HOME/.copilot/skills" ;;
   copilot:project)     echo ".github/skills" ;;
 esac; }
-# Hub neutral que leen varios CLIs (Claude Code, Codex, Antigravity…).
-neutral_dir() { case "$1" in user) echo "$HOME/.agents/skills" ;; project) echo ".agents/skills" ;; esac; }
 id_from_token() { case "$(echo "$1" | tr -d ' ' | tr 'A-Z' 'a-z')" in
   1|claude|claude-code) echo claude ;; 2|cursor) echo cursor ;; 3|codex) echo codex ;;
   4|antigravity|agy|gemini) echo antigravity ;; 5|copilot) echo copilot ;; *) echo "" ;;
@@ -205,19 +203,6 @@ if [ -z "$METHOD" ]; then
 fi
 [ "$METHOD" = "copy" ] || METHOD="symlink"
 
-# --- Carpetas destino (nativas de cada CLI + hub neutral), sin duplicados ----
-dirs=()
-for a in $selected; do dirs+=("$(native_dir "$a" "$SCOPE")"); done
-dirs+=("$(neutral_dir "$SCOPE")")
-uniq_dirs=()
-for d in "${dirs[@]}"; do
-  dup=0
-  if [ "${#uniq_dirs[@]}" -gt 0 ]; then
-    for u in "${uniq_dirs[@]}"; do [ "$u" = "$d" ] && dup=1 && break; done
-  fi
-  [ "$dup" -eq 0 ] && uniq_dirs+=("$d")
-done
-
 # --- Origen del SKILL.md (repo local o clon temporal) -----------------------
 SRC_DIR=""
 if [ -f "SKILL.md" ]; then
@@ -242,30 +227,29 @@ install_copy() { # install_copy <dir> -> ruta absoluta del skill
 }
 
 echo ""
-echo "Instalando '$SKILL_NAME' (ámbito: $SCOPE, método: $METHOD)"
-echo "CLIs: $selected"
-echo "en estas carpetas:"
+echo "Instalando '$SKILL_NAME' (ámbito: $SCOPE, método: $METHOD) en:"
 
 if [ "$METHOD" = "copy" ]; then
-  for d in "${uniq_dirs[@]}"; do
-    dest="$(install_copy "$d")"
-    echo "  ✓ $dest/SKILL.md"
+  for a in $selected; do
+    dest="$(install_copy "$(native_dir "$a" "$SCOPE")")"
+    echo "  ✓ $(agent_label "$a"): $dest/SKILL.md"
   done
 else
   canonical=""
-  for d in "${uniq_dirs[@]}"; do
+  for a in $selected; do
+    dir="$(native_dir "$a" "$SCOPE")"
     if [ -z "$canonical" ]; then
-      canonical="$(install_copy "$d")"
-      echo "  ✓ (canónica) $canonical/SKILL.md"
+      canonical="$(install_copy "$dir")"
+      echo "  ✓ $(agent_label "$a") (canónica): $canonical/SKILL.md"
       continue
     fi
-    dest="$d/$SKILL_NAME"
-    mkdir -p "$d"; rm -rf "$dest" 2>/dev/null || true
+    dest="$dir/$SKILL_NAME"
+    mkdir -p "$dir"; rm -rf "$dest" 2>/dev/null || true
     if ln -s "$canonical" "$dest" 2>/dev/null; then
-      echo "  ✓ (symlink)  $dest -> $canonical"
+      echo "  ✓ $(agent_label "$a") (symlink): $dest -> $canonical"
     else
-      dest="$(install_copy "$d")"
-      echo "  ! symlink no permitido; copiado en $dest/SKILL.md"
+      dest="$(install_copy "$dir")"
+      echo "  ! $(agent_label "$a"): symlink no permitido; copiado en $dest/SKILL.md"
     fi
   done
 fi
