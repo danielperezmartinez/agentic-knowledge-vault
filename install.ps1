@@ -15,7 +15,7 @@ $RepoUrl   = 'https://github.com/danielperezmartinez/agentic-knowledge-vault.git
 $Agents = [ordered]@{
   claude  = @{ label = 'Claude Code';    user = "$HOME/.claude/skills";  project = ".claude/skills" }
   cursor  = @{ label = 'Cursor';         user = "$HOME/.cursor/skills";  project = ".cursor/skills" }
-  codex   = @{ label = 'Codex';          user = "$HOME/.agents/skills";  project = ".agents/skills" }
+  codex   = @{ label = 'Codex';          user = "$HOME/.codex/skills";   project = ".agents/skills" }
   gemini  = @{ label = 'Gemini CLI';     user = "$HOME/.gemini/skills";  project = ".gemini/skills" }
   copilot = @{ label = 'GitHub Copilot'; user = "$HOME/.copilot/skills"; project = ".github/skills" }
 }

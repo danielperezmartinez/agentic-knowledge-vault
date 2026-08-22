@@ -59,7 +59,7 @@ agent_dir() { case "$1:$2" in
   claude:project)  echo ".claude/skills" ;;
   cursor:user)     echo "$HOME/.cursor/skills" ;;
   cursor:project)  echo ".cursor/skills" ;;
-  codex:user)      echo "$HOME/.agents/skills" ;;
+  codex:user)      echo "$HOME/.codex/skills" ;;
   codex:project)   echo ".agents/skills" ;;
   gemini:user)     echo "$HOME/.gemini/skills" ;;
   gemini:project)  echo ".gemini/skills" ;;

@@ -87,9 +87,17 @@ CLIs soportados y dónde se coloca el skill (`<dir>/agentic-knowledge-vault/SKIL
 | --- | --- | --- |
 | Claude Code | `~/.claude/skills` | `.claude/skills` |
 | Cursor | `~/.cursor/skills` | `.cursor/skills` |
-| Codex | `~/.agents/skills` | `.agents/skills` |
+| Codex | `~/.codex/skills` | `.agents/skills` |
 | Gemini CLI | `~/.gemini/skills` | `.gemini/skills` |
 | GitHub Copilot | `~/.copilot/skills` | `.github/skills` |
+
+> Algunos CLIs (p. ej. Codex, Antigravity) descubren un `.agents/skills` de
+> proyecto **subiendo** por el árbol de carpetas desde el proyecto. Una
+> instalación de ámbito usuario solo llega a esos CLIs cuando el proyecto cuelga
+> de tu carpeta de usuario. Si tus proyectos están en una **unidad distinta** a
+> la de tu perfil (habitual en Windows, p. ej. `P:\`), usa una instalación de
+> ámbito **proyecto** en cada repo para que la skill se encuentre en cualquier
+> unidad.
 
 No interactivo (CI / automatización):
 

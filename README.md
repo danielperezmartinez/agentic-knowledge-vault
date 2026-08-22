@@ -83,9 +83,16 @@ Supported CLIs and where the skill is placed (`<dir>/agentic-knowledge-vault/SKI
 | --- | --- | --- |
 | Claude Code | `~/.claude/skills` | `.claude/skills` |
 | Cursor | `~/.cursor/skills` | `.cursor/skills` |
-| Codex | `~/.agents/skills` | `.agents/skills` |
+| Codex | `~/.codex/skills` | `.agents/skills` |
 | Gemini CLI | `~/.gemini/skills` | `.gemini/skills` |
 | GitHub Copilot | `~/.copilot/skills` | `.github/skills` |
+
+> Some tools (e.g. Codex, Antigravity) also discover a project-level
+> `.agents/skills` by walking **up** from the project folder. A user-scope
+> install only reaches those tools when the project lives under your home
+> directory. If your projects are on a **different drive** than your user
+> profile (common on Windows, e.g. `P:\`), prefer a **project-scope** install in
+> each repo so the skill is found regardless of drive.
 
 Non-interactive (CI / automation):
 
