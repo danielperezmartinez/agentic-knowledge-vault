@@ -227,22 +227,22 @@ fi
 
 fi # fin del bloque solo-instalar
 
-# --- Origen del SKILL.md (repo local o clon temporal) -----------------------
-# El skill vive en skills/<name>/SKILL.md (estructura de plugin).
-SRC_SKILL=""
+# --- Origen del skill: la carpeta completa (repo local o clon temporal) ------
+# El skill vive en skills/<name>/ (estructura de plugin): SKILL.md + references/.
+SRC_DIR=""
 resolve_source() {
-  rel="skills/$SKILL_NAME/SKILL.md"
-  if [ -f "$rel" ]; then
-    SRC_SKILL="$(cd "$(dirname "$rel")" && pwd)/SKILL.md"
-  elif [ -n "${BASH_SOURCE:-}" ] && [ -f "$(dirname "${BASH_SOURCE:-}")/$rel" ]; then
-    SRC_SKILL="$(cd "$(dirname "${BASH_SOURCE}")/skills/$SKILL_NAME" && pwd)/SKILL.md"
+  reldir="skills/$SKILL_NAME"
+  if [ -f "$reldir/SKILL.md" ]; then
+    SRC_DIR="$(cd "$reldir" && pwd)"
+  elif [ -n "${BASH_SOURCE:-}" ] && [ -f "$(dirname "${BASH_SOURCE:-}")/$reldir/SKILL.md" ]; then
+    SRC_DIR="$(cd "$(dirname "${BASH_SOURCE}")/$reldir" && pwd)"
   else
     CLEANUP_TMP="$(mktemp -d)"
     echo "Descargando el skill…"
     git clone --depth 1 "$REPO_URL" "$CLEANUP_TMP" >/dev/null 2>&1
-    SRC_SKILL="$CLEANUP_TMP/$rel"
+    SRC_DIR="$CLEANUP_TMP/$reldir"
   fi
-  [ -f "$SRC_SKILL" ] || { echo "No se encontró SKILL.md en el origen." >&2; exit 1; }
+  [ -f "$SRC_DIR/SKILL.md" ] || { echo "No se encontró SKILL.md en el origen." >&2; exit 1; }
 }
 
 # --- Instalación ------------------------------------------------------------
@@ -250,7 +250,7 @@ install_copy() { # install_copy <dir> -> ruta absoluta del skill
   local dest="$1/$SKILL_NAME"
   rm -rf "$dest" 2>/dev/null || true
   mkdir -p "$dest"
-  cp "$SRC_SKILL" "$dest/SKILL.md"
+  cp -R "$SRC_DIR"/. "$dest/"
   ( cd "$dest" && pwd )
 }
 
@@ -274,7 +274,10 @@ if [ "$ACTION" = "update" ]; then
   for tok in $locs; do
     a="${tok%%:*}"; sc="${tok##*:}"
     skdir="$(native_dir "$a" "$sc")/$SKILL_NAME"
-    cp "$SRC_SKILL" "$skdir/SKILL.md"
+    # Refresca la carpeta completa (SKILL.md + references/). En instalaciones por
+    # symlink, esto escribe a través del enlace sobre la copia canónica.
+    rm -rf "$skdir/references" 2>/dev/null || true
+    cp -R "$SRC_DIR"/. "$skdir/"
     if [ -L "$skdir" ]; then tag="symlink -> canónica"; else tag="copia"; fi
     echo "  ✓ $(agent_label "$a") [$sc] ($tag): $skdir/SKILL.md"
   done

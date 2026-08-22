@@ -161,19 +161,19 @@ if ($Method -ne 'copy') { $Method = 'symlink' }
 
 } # fin del bloque solo-instalar
 
-# --- Origen del SKILL.md (repo local o clon temporal) -----------------------
-# El skill vive en skills/<name>/SKILL.md (estructura de plugin).
+# --- Origen del skill: la carpeta completa (repo local o clon temporal) ------
+# El skill vive en skills/<name>/ (estructura de plugin): SKILL.md + references/.
 $TmpDir = $null
-function Get-SourceSkill {
-  $rel = Join-Path 'skills' (Join-Path $SkillName 'SKILL.md')
-  if (Test-Path $rel) { return (Resolve-Path $rel).Path }
-  if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot $rel))) { return (Resolve-Path (Join-Path $PSScriptRoot $rel)).Path }
+function Get-SourceDir {
+  $reldir = Join-Path 'skills' $SkillName
+  if (Test-Path (Join-Path $reldir 'SKILL.md')) { return (Resolve-Path $reldir).Path }
+  if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot (Join-Path $reldir 'SKILL.md')))) { return (Resolve-Path (Join-Path $PSScriptRoot $reldir)).Path }
   $script:TmpDir = Join-Path ([System.IO.Path]::GetTempPath()) ("akv-" + [System.Guid]::NewGuid().ToString('N'))
   Write-Host "Descargando el skill…"
   git clone --depth 1 $RepoUrl $script:TmpDir *> $null
-  $s = Join-Path $script:TmpDir $rel
-  if (-not (Test-Path $s)) { throw "No se encontró SKILL.md en el origen." }
-  return $s
+  $d = Join-Path $script:TmpDir $reldir
+  if (-not (Test-Path (Join-Path $d 'SKILL.md'))) { throw "No se encontró SKILL.md en el origen." }
+  return $d
 }
 
 # --- Instalación ------------------------------------------------------------
@@ -181,7 +181,7 @@ function Install-Copy([string]$dir) {
   $dest = Join-Path $dir $SkillName
   if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
   New-Item -ItemType Directory -Force -Path $dest | Out-Null
-  Copy-Item $SrcSkill (Join-Path $dest 'SKILL.md') -Force
+  Copy-Item (Join-Path $SrcDir '*') $dest -Recurse -Force
   return (Resolve-Path $dest).Path
 }
 
@@ -200,11 +200,15 @@ try {
       Write-Host "Ejecuta de nuevo y elige «Instalar»."
       return
     }
-    $SrcSkill = Get-SourceSkill
+    $SrcDir = Get-SourceDir
     Write-Host ""
     Write-Host "Actualizando instalaciones existentes de '$SkillName':"
     foreach ($l in $locs) {
-      Copy-Item $SrcSkill $l.file -Force
+      # Refresca la carpeta completa (SKILL.md + references/). En instalaciones
+      # por symlink, esto escribe a través del enlace sobre la copia canónica.
+      $refs = Join-Path $l.dir 'references'
+      if (Test-Path $refs) { Remove-Item -Recurse -Force $refs }
+      Copy-Item (Join-Path $SrcDir '*') $l.dir -Recurse -Force
       $isLink = $false
       try { $isLink = ((Get-Item $l.dir -Force).LinkType -eq 'SymbolicLink') } catch { }
       $tag = if ($isLink) { 'symlink -> canónica' } else { 'copia' }
@@ -215,7 +219,7 @@ try {
     return
   }
 
-  $SrcSkill = Get-SourceSkill
+  $SrcDir = Get-SourceDir
   Write-Host ""
   Write-Host "Instalando '$SkillName' (ámbito: $Scope, método: $Method) en:"
 

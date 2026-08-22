@@ -38,6 +38,22 @@ El principio rector de toda la bóveda: **una sola fuente de verdad por cada
 unidad de conocimiento**; nunca se crean copias paralelas de una regla o
 decisión, se enlaza a su origen con wikilinks.
 
+### Cómo está organizado este skill (léelo antes de montar nada)
+
+Para no cargar tu contexto con instrucciones que no vas a usar, el skill está
+**fragmentado**: este `SKILL.md` contiene solo la **entrevista** (Paso 0), el
+**mapa de montaje** y la **verificación**. El procedimiento concreto de cada
+pieza vive en un fichero aparte dentro de `references/`, y **solo debes abrirlo
+cuando lo vayas a montar**:
+
+- Los pasos de construcción de la base y de cada sistema NO están aquí. Están en
+  `references/` (ver "Cómo montar: mapa de ficheros" más abajo).
+- Flujo correcto: completa la entrevista → determina qué montar → **lee solo los
+  ficheros de `references/` que correspondan** → aplícalos en orden → verifica.
+- Si el usuario solo quiere, por ejemplo, el sistema de Tareas, abrirás
+  `references/base-compartida.md` y `references/sistema-tareas.md`, y **ningún
+  otro**: las instrucciones de ADR, catálogo, etc. serían ruido.
+
 ---
 
 ## Paso 0 — Detectar el modo y entrevista guiada (OBLIGATORIO antes de escribir nada)
@@ -59,7 +75,8 @@ Comprueba si el repo ya tiene este mecanismo montado. Señales:
 Según el resultado:
 
 - **No existe → modo _montaje inicial_.** Haz todas las preguntas (1–5) y monta
-  desde cero siguiendo los pasos 1–9.
+  desde cero: la base compartida y los sistemas elegidos (ver "Cómo montar: mapa
+  de ficheros").
 - **Ya existe → modo _ampliación_.** NO rehagas el montaje ni los punteros ni el
   README base. **Lee el README e `Inicio` existentes** para conocer los parámetros
   reales (ruta de la bóveda, idioma, nombre del proyecto) y qué sistemas ya están
@@ -69,7 +86,8 @@ Según el resultado:
      precisamente para añadir sistemas).
   2. Si el sistema nuevo necesita definir contenido, aplica la **Pregunta 3**
      (rellenar ahora o dejar plantilla) solo para ese sistema.
-  3. Ejecuta únicamente el paso de construcción del/los sistema(s) elegido(s).
+  3. Lee y aplica **solo** el fichero de `references/` del/los sistema(s)
+     elegido(s). NO abras `references/base-compartida.md` (la base ya existe).
   4. Actualiza la sección "Sistemas disponibles" del README y los enlaces de
      `Inicio` para incluir el sistema nuevo. **No toques los sistemas existentes.**
 
@@ -129,12 +147,13 @@ Pregunta primero el alcance:
 - **Montar también sistemas de conocimiento** — además de la base, uno o más
   sistemas; continúa con la Pregunta 2b.
 
-Si elige **"Solo la base compartida"**: ejecuta **solo los pasos 1, 2, 3, 8
-(opcional) y 9**; deja la sección "Sistemas disponibles" del README indicando que
-aún no hay sistemas montados (como en este repo) y en `Inicio` lista bajo
-"Próximos sistemas" los que podrían añadirse reinvocando el skill en modo
-ampliación. **No hagas la Pregunta 2b ni ninguna pregunta de sistemas.** Da el
-montaje por terminado; no reabras la decisión.
+Si elige **"Solo la base compartida"**: monta **solo** `references/base-compartida.md`
+(y, si el usuario usa Obsidian, `references/obsidian.md`); deja la sección
+"Sistemas disponibles" del README indicando que aún no hay sistemas montados (como
+en este repo) y en `Inicio` lista bajo "Próximos sistemas" los que podrían
+añadirse reinvocando el skill en modo ampliación. **No hagas la Pregunta 2b ni
+ninguna pregunta de sistemas.** Da el montaje por terminado; no reabras la
+decisión.
 
 #### Pregunta 2b — Qué sistemas (selección múltiple) · _ambos modos_
 
@@ -193,559 +212,36 @@ plantilla" para la sección de reglas y continúa.
 - **Nombre del proyecto** para los encabezados.
 
 Registra las respuestas y úsalas como parámetros en todo lo que sigue. En las
-plantillas de abajo, sustituye `{{PROYECTO}}`, `{{BÓVEDA}}` (por defecto `docs`)
-y demás marcadores.
+plantillas de los ficheros de `references/`, sustituye `{{PROYECTO}}`,
+`{{BÓVEDA}}` (por defecto `docs`) y demás marcadores.
 
 ---
 
-## Paso 1 — Punteros de arranque
+## Cómo montar: mapa de ficheros de `references/`
 
-Crea en la **raíz del repo** un fichero puntero por cada CLI/agente elegido en la
-Pregunta 1, según el mapeo de esa pregunta (Claude Code → `CLAUDE.md`, Codex →
-`AGENTS.md`, etc.). Todos los ficheros llevan **exactamente el mismo contenido**;
-son solo punteros y **no duplican reglas**. Si varias herramientas comparten
-fichero, se crea una sola vez.
+Terminada la entrevista, ya sabes qué montar. **Lee y aplica solo** los ficheros
+de esta tabla que correspondan, en este orden. No abras los que no vas a usar.
 
-Contenido idéntico de cada puntero (es el que hoy usa este repo; conserva el
-encabezado `# AGENTS.md` en todos los ficheros para que sean byte a byte
-iguales):
+| Qué vas a montar | Fichero a leer y aplicar | Cuándo |
+| --- | --- | --- |
+| Punteros + `README.md` + `Inicio.md` (Pasos 1–3) | `references/base-compartida.md` | **Siempre en montaje inicial.** Nunca en ampliación (ya existe). |
+| Sistema de Tareas (Paso 4) | `references/sistema-tareas.md` | Solo si se eligió Tareas. |
+| Sistema ADR (Paso 5) | `references/sistema-adr.md` | Solo si se eligió ADR. |
+| Decisiones visuales (Paso 6) | `references/sistema-decisiones-visuales.md` | Solo si se eligió. |
+| Catálogo técnico (Paso 7) | `references/sistema-catalogo-tecnico.md` | Solo si se eligió. |
+| Configuración de Obsidian (Paso 8) | `references/obsidian.md` | Opcional; si el usuario usa Obsidian. |
 
-```markdown
-# AGENTS.md
+Orden de aplicación:
 
-## Instrucción obligatoria de arranque
-
-Antes de realizar cualquier análisis, comando, cambio o respuesta sobre este
-repositorio, **lee íntegramente `{{BÓVEDA}}/README.md` y aplica sus
-instrucciones**.
-
-`{{BÓVEDA}}/README.md` es la única fuente de verdad para las reglas del proyecto
-y para el uso de la bóveda de memoria. Si no puedes leerlo, detente e informa al
-usuario; no continúes por inferencia ni uses una copia de sus reglas.
-```
+1. **Montaje inicial**: primero `base-compartida.md`; después, un fichero por cada
+   sistema elegido; al final `obsidian.md` si aplica. Cada fichero de sistema te
+   dice qué añadir a "Sistemas disponibles" del `README.md` y a `Inicio.md`.
+2. **Ampliación**: NO leas `base-compartida.md`. Lee solo el/los fichero(s) del/de
+   los sistema(s) nuevo(s), móntalos y actualiza `README.md` e `Inicio.md`.
 
 ---
 
-## Paso 2 — La fuente de verdad: `{{BÓVEDA}}/README.md`
-
-Este es el corazón del sistema. Estructura obligatoria (adapta las "Reglas
-fundamentales" según la entrevista; si es plantilla, deja las subsecciones con
-`<!-- TODO -->`):
-
-```markdown
-# Memoria del proyecto
-
-Esta carpeta es simultáneamente una bóveda de Obsidian, la documentación viva del
-proyecto y la memoria compartida por las personas, CLI y agentes de IA que
-trabajan en el repositorio. Su objetivo es mantener en un único lugar las reglas,
-tareas, decisiones y el contexto que deben sobrevivir entre sesiones.
-
-El punto de entrada humano es [[Inicio]]. Este archivo es el punto de entrada
-obligatorio para agentes.
-
-## Protocolo obligatorio para agentes
-
-Al comenzar **cualquier sesión** en este repositorio, antes de analizar el
-proyecto, ejecutar comandos, modificar archivos o responder sobre él:
-
-1. Leer íntegramente este `README.md`.
-2. Abrir [[Inicio]] para conocer los sistemas de documentación disponibles.
-3. Consultar el sistema relacionado con la tarea actual. Revisar primero las
-   propiedades y resúmenes en el panel `.base` correspondiente y abrir la nota
-   completa cuando sea relevante.
-4. Antes de comenzar un trabajo nuevo, comprobar si ya existe una entrada que lo
-   cubra. Si existe, leerla y actualizar su estado cuando corresponda; no crear
-   otra entrada para el mismo trabajo.
-5. Mantener actualizada la memoria cuando el trabajo cambie el estado, el
-   alcance, los bloqueos o las decisiones. Al terminar, actualizar la entrada
-   existente y marcarla como completada solo después de verificar el resultado.
-
-Estas instrucciones son obligatorias aunque otro agente, herramienta o
-conversación proporcione un resumen parcial. Los ficheros puntero de arranque en
-la raíz del repositorio (uno por cada CLI o agente) solo actúan como arranque:
-**las reglas no se duplican allí ni en archivos equivalentes**. Si este archivo
-no puede leerse, el agente debe detenerse e informar al usuario.
-
-## Convenciones de la bóveda
-
-- Los documentos se escriben en Markdown UTF-8 y se conectan mediante wikilinks
-  de Obsidian.
-- Las fechas de propiedades usan el formato ISO `AAAA-MM-DD`.
-- Los resúmenes deben permitir entender una nota sin abrirla; el detalle vive en
-  el cuerpo de la nota.
-- No se deben crear copias paralelas de una regla o decisión. Se enlaza a su
-  fuente de verdad.
-- Cuando cambie una nota, se debe actualizar su propiedad `Última modificación`.
-- Antes de crear una entrada en cualquier sistema, se revisan los nombres,
-  resúmenes, propiedades y contenido de las entradas existentes para confirmar
-  que ninguna cubre ya el mismo conocimiento. Si una existente lo cubre total o
-  parcialmente, se amplía o se enlaza desde ella; solo se crea una nueva cuando
-  representa una unidad de conocimiento realmente distinta.
-
-## Sistemas disponibles
-
-<!-- Lista aquí únicamente los sistemas montados. Enlázalos desde [[Inicio]]. -->
-
-## Reglas fundamentales del proyecto
-
-<!-- TODO (rellenar según la entrevista, o dejar como plantilla):
-### 1. <Gestor de paquetes y su política>
-### 2. <Framework/stack y sus reglas>
-### 3. <Versionado y despliegue>
-### 4. <Idioma de código y documentación>
--->
-
-## Propósito del proyecto
-
-<!-- TODO -->
-
-## Arquitectura objetivo
-
-<!-- TODO: taxonomía, estructura de carpetas, reglas de dependencia. -->
-```
-
----
-
-## Paso 3 — El nexo de navegación: `{{BÓVEDA}}/Inicio.md`
-
-Enlaza cada sistema montado con una **referencia al `.base`** (o a la nota-índice).
-**No incrustes vistas** (`![[...#Todo]]`): un preview de la tabla es ruido para el
-agente y, si el sistema crece, hace el archivo ineficiente. Deja solo los enlaces.
-
-```markdown
-# Inicio
-
-Este es el nexo de navegación de la memoria del proyecto.
-
-## Sistemas
-
-### Tareas
-
-[[Tareas/Tareas.base|Abrir el panel de tareas]]
-
-<!-- Añade aquí una sección por cada sistema montado (ADR, Decisiones
-visuales, Catálogo técnico...), solo con el enlace a su .base o nota-índice. -->
-
-## Próximos sistemas
-
-- <Sistemas previstos aún no montados.>
-```
-
----
-
-## Paso 4 — Sistema de Tareas (opcional)
-
-Móntalo solo si el usuario lo eligió en la Pregunta 2b. Crea la carpeta
-`{{BÓVEDA}}/Tareas/` con:
-
-### 4a. Plantilla de nota de tarea
-
-Nombre de fichero = título descriptivo (`Corregir cálculo de objetivos.md`). Sin
-numeración.
-
-```markdown
----
-Nombre: <Título de la tarea>
-Estado: Pendiente
-Resumen: <Una o dos frases que permitan entender la tarea sin abrirla.>
-Decisiones: <Acuerdos relevantes tomados durante la tarea. Vacío al crear.>
-Bloqueada: []
-Fecha de creación: <AAAA-MM-DDTHH:mm:ss+ZZ:ZZ>
-Última modificación: <AAAA-MM-DDTHH:mm:ss+ZZ:ZZ>
----
-
-# <Título de la tarea>
-
-## Objetivo
-
-<Qué se persigue y por qué.>
-
-## Criterios de finalización
-
-- <Condición verificable 1.>
-
-## Verificación
-
-<Se rellena al completar: pruebas, build, comprobación real.>
-
-## Resultado
-
-<Se rellena al completar: qué se hizo finalmente.>
-```
-
-Reglas de estado (documéntalas en el README, sección Tareas):
-
-- `Estado` ∈ `Planificando` · `Pendiente` · `En curso` · `Hecha` · `Archivada`.
-- `Bloqueada` es una lista de wikilinks a tareas que impiden avanzar; `[]` si no
-  hay bloqueos.
-- Al empezar → `En curso`; al completar y **verificar** → `Hecha`; lo que ya no
-  deba aparecer en el trabajo habitual → `Archivada`.
-- Antes de crear una tarea, buscar en TODAS (incluidas `Hecha` y `Archivada`)
-  para no duplicar.
-
-### 4b. Índice `Tareas.base`
-
-```yaml
-filters:
-  and:
-    - file.inFolder("Tareas")
-    - file.ext == "md"
-    - Estado != null
-formulas:
-  created_display: note["Fecha de creación"].format("DD-MM-YYYY HH:mm")
-  updated_display: note["Última modificación"].format("DD-MM-YYYY HH:mm")
-properties:
-  file.name:
-    displayName: Tarea
-  Estado:
-    displayName: Estado
-  Resumen:
-    displayName: Resumen
-  Decisiones:
-    displayName: Decisiones
-  Bloqueada:
-    displayName: Bloqueada por
-  formula.created_display:
-    displayName: Creada
-  formula.updated_display:
-    displayName: Modificada
-views:
-  - type: table
-    name: Todo
-    order:
-      - file.name
-      - Estado
-      - Resumen
-      - Decisiones
-      - Bloqueada
-      - formula.created_display
-      - formula.updated_display
-    sort:
-      - property: formula.updated_display
-        direction: DESC
-      - property: Fecha de creación
-        direction: ASC
-  - type: table
-    name: Planificando
-    filters:
-      and:
-        - Estado == "Planificando"
-    order: [file.name, Estado, Resumen, Decisiones, Bloqueada, formula.created_display, formula.updated_display]
-  - type: table
-    name: Pendiente
-    filters:
-      and:
-        - Estado == "Pendiente"
-    order: [file.name, Estado, Resumen, Decisiones, Bloqueada, formula.created_display, formula.updated_display]
-  - type: table
-    name: En curso
-    filters:
-      and:
-        - Estado == "En curso"
-    order: [file.name, Estado, Resumen, Decisiones, Bloqueada, formula.created_display, formula.updated_display]
-  - type: table
-    name: Hecha
-    filters:
-      and:
-        - Estado == "Hecha"
-    order: [file.name, Estado, Resumen, Decisiones, formula.created_display, formula.updated_display]
-  - type: table
-    name: Archivada
-    filters:
-      and:
-        - Estado == "Archivada"
-    order: [file.name, Estado, Resumen, Decisiones, formula.created_display, formula.updated_display]
-```
-
----
-
-## Paso 5 — Sistema ADR de arquitectura (opcional)
-
-Móntalo solo si el usuario lo pidió (recomendado en proyectos medianos/grandes).
-Sigue **el mismo principio que Tareas**: notas con frontmatter YAML + un `.base`.
-Carpeta `{{BÓVEDA}}/Decisiones/` (o `ADR/`).
-
-### 5a. Plantilla de nota ADR
-
-Nombre de fichero = `ADR-0001 Título de la decisión.md`. La numeración da orden
-estable; el título descriptivo aporta legibilidad.
-
-```markdown
----
-Nombre: <Título de la decisión>
-Número: 1
-Estado: Propuesta
-Resumen: <Qué se decide y por qué, entendible sin abrir la nota.>
-Decisión: <La decisión en una frase.>
-Consecuencias: <Impactos y compromisos clave que deben recordarse.>
-Reemplaza: []
-Reemplazada por: []
-Fecha de creación: <AAAA-MM-DDTHH:mm:ss+ZZ:ZZ>
-Última modificación: <AAAA-MM-DDTHH:mm:ss+ZZ:ZZ>
----
-
-# ADR-0001 · <Título de la decisión>
-
-## Contexto
-
-<Fuerzas, restricciones y problema que motivan la decisión.>
-
-## Decisión
-
-<Qué se decide, de forma concreta y accionable.>
-
-## Alternativas consideradas
-
-- <Opción A> — <por qué se descartó o aceptó.>
-
-## Consecuencias
-
-- Positivas: <...>
-- Negativas / compromisos: <...>
-```
-
-Reglas de estado (documéntalas en el README, sección ADR):
-
-- `Estado` ∈ `Propuesta` · `Aceptada` · `Rechazada` · `Obsoleta` · `Reemplazada`.
-- Una ADR **no se edita para cambiar la decisión**: se marca `Reemplazada` y se
-  crea una nueva que la sustituye, enlazando ambas con `Reemplaza` /
-  `Reemplazada por`.
-- `Número` es correlativo y no se reutiliza.
-- Si una decisión afecta a una tarea, se enlazan mutuamente con wikilinks.
-
-### 5b. Índice `Decisiones.base`
-
-```yaml
-filters:
-  and:
-    - file.inFolder("Decisiones")
-    - file.ext == "md"
-    - Estado != null
-formulas:
-  created_display: note["Fecha de creación"].format("DD-MM-YYYY HH:mm")
-  updated_display: note["Última modificación"].format("DD-MM-YYYY HH:mm")
-properties:
-  file.name:
-    displayName: Decisión
-  Número:
-    displayName: Nº
-  Estado:
-    displayName: Estado
-  Resumen:
-    displayName: Resumen
-  Decisión:
-    displayName: Decisión
-  Consecuencias:
-    displayName: Consecuencias
-  formula.created_display:
-    displayName: Creada
-  formula.updated_display:
-    displayName: Modificada
-views:
-  - type: table
-    name: Todo
-    order:
-      - Número
-      - file.name
-      - Estado
-      - Resumen
-      - Decisión
-      - Consecuencias
-      - formula.created_display
-      - formula.updated_display
-    sort:
-      - property: Número
-        direction: ASC
-  - type: table
-    name: Aceptadas
-    filters:
-      and:
-        - Estado == "Aceptada"
-    order: [Número, file.name, Resumen, Decisión, Consecuencias, formula.updated_display]
-    sort:
-      - property: Número
-        direction: ASC
-  - type: table
-    name: Propuestas
-    filters:
-      and:
-        - Estado == "Propuesta"
-    order: [Número, file.name, Resumen, Decisión, formula.created_display]
-  - type: table
-    name: Reemplazadas u obsoletas
-    filters:
-      or:
-        - Estado == "Reemplazada"
-        - Estado == "Obsoleta"
-        - Estado == "Rechazada"
-    order: [Número, file.name, Estado, Resumen, formula.updated_display]
-```
-
----
-
-## Paso 6 — Decisiones visuales y de estilos (opcional)
-
-Dos formas, según lo que pida el usuario:
-
-- **Como sistema tipo ADR**: reutiliza la estructura del Paso 5 en una carpeta
-  `{{BÓVEDA}}/Decisiones visuales/` con su propio `.base`. Estados sugeridos:
-  `Propuesta` · `Aceptada` · `Reemplazada`. Añade propiedades propias del dominio
-  visual si aportan (p. ej. `Ámbito`: tokens, componente, layout).
-- **Como lista ligera**: una única nota-índice con tabla Markdown si el volumen
-  es bajo. Migra a `.base` cuando crezca.
-
-No inventes un tercer patrón: cualquier sistema de "decisiones" comparte el
-principio de frontmatter YAML + `.base`.
-
----
-
-## Paso 7 — Catálogo técnico (opcional)
-
-Móntalo solo si el usuario lo eligió. Sigue **el mismo principio que Tareas/ADR**:
-una carpeta de notas estructuradas con frontmatter YAML (una por pieza
-reutilizable) + un `.base` que las indexa, **más** una nota-índice fuera de la
-carpeta. Cada nota es un puntero corto: la **implementación** sigue siendo la
-fuente de verdad técnica del contrato.
-
-Estructura:
-
-- `{{BÓVEDA}}/Catálogo técnico/` — una nota por pieza + `Catálogo técnico.base`.
-- `{{BÓVEDA}}/Catálogo técnico.md` — nota-índice (enlace al `.base` + cómo usarlo
-  + política de evolución).
-
-### 7a. Plantilla de nota de pieza
-
-Nombre de fichero = nombre de la pieza (`DataListComponent.md`, `.ui-button`
-→ `ui-button.md`). Frontmatter (adapta los vocabularios a tu proyecto):
-
-```markdown
----
-Nombre: "<NombreDeLaPieza>"
-Tipo: "<Componente | Servicio | Fachada | Directiva | Utilidad | Primitiva CSS | Token | Guard>"
-Área: "<Global | ... según tu taxonomía>"
-Feature: "<Shared UI | ... según tu taxonomía>"
-Estado: "Vigente"
-Ámbito: "<Aplicación | Feature | Shell>"
-Fuente: "<ruta/a/la/implementación>"
-Entrada pública: "<entrypoint de import, si aplica>"
-Resumen: "<Qué hace y su contrato, entendible sin abrir la fuente.>"
-Última modificación: "<AAAA-MM-DDTHH:mm:ss+ZZ:ZZ>"
----
-
-# <NombreDeLaPieza>
-
-Después de descubrir esta pieza en el catálogo, consulta [su implementación](<ruta relativa a la fuente>)
-como fuente de verdad de su contrato detallado.
-```
-
-Reglas de estado (documéntalas en el README, sección Catálogo técnico):
-
-- `Estado` ∈ `Vigente` · `En revisión` · `Obsoleta`. Se evita depender de piezas
-  `En revisión` salvo que el trabajo incluya estabilizarlas.
-- Se añade o actualiza la entrada **en el mismo cambio** que crea o altera una
-  superficie reutilizable.
-- `Tipo`, `Área`, `Feature` y `Ámbito` son vocabularios propios del proyecto:
-  defínelos con el usuario y mantenlos consistentes.
-
-### 7b. Índice `Catálogo técnico.base`
-
-```yaml
-filters:
-  and:
-    - file.inFolder("Catálogo técnico")
-    - file.ext == "md"
-    - Nombre != null
-properties:
-  file.name:
-    displayName: Pieza
-  Tipo: { displayName: Tipo }
-  Área: { displayName: Área }
-  Feature: { displayName: Feature }
-  Estado: { displayName: Estado }
-  Ámbito: { displayName: Ámbito }
-  Resumen: { displayName: Propósito y contrato }
-  Fuente: { displayName: Fuente }
-  Entrada pública: { displayName: Entrada pública }
-views:
-  - type: table
-    name: Todo
-    order: [file.name, Tipo, Área, Feature, Estado, Ámbito, Resumen, Fuente, Entrada pública]
-    sort:
-      - property: Área
-        direction: ASC
-      - property: Feature
-        direction: ASC
-      - property: Nombre
-        direction: ASC
-  - type: table
-    name: Vigentes
-    filters:
-      and:
-        - Estado == "Vigente"
-    order: [file.name, Tipo, Área, Feature, Ámbito, Resumen, Fuente, Entrada pública]
-  - type: table
-    name: En revisión
-    filters:
-      and:
-        - Estado == "En revisión"
-    order: [file.name, Tipo, Área, Feature, Resumen, Fuente]
-```
-
-Añade vistas filtradas propias del proyecto cuando aporten (p. ej. por `Feature`,
-por `Área` o por `Tipo`), siguiendo el mismo patrón.
-
-### 7c. Nota-índice `Catálogo técnico.md`
-
-```markdown
-# Catálogo técnico
-
-Este sistema permite descubrir la superficie reutilizable de {{PROYECTO}} antes de
-buscar por todo el repositorio o crear una implementación nueva. Cada fila enlaza
-con su nota estructurada; después de localizar una candidata se abre su
-implementación, que continúa siendo la fuente de verdad técnica.
-
-[[Catálogo técnico/Catálogo técnico.base|Abrir la vista completa del catálogo]]
-
-## Cómo utilizarlo
-
-1. Filtrar la vista por tipo, área, feature o estado.
-2. Evitar las piezas `En revisión` salvo que el trabajo incluya estabilizarlas.
-3. Abrir la fuente antes de depender de los detalles del contrato o modificarla.
-4. Añadir o actualizar la entrada en el mismo cambio que altere una superficie
-   reutilizable.
-
-## Política de evolución
-
-- Se amplía una pieza existente cuando el nuevo caso conserva su responsabilidad y
-  un contrato claro.
-- Se crea una pieza nueva solo cuando representa un patrón estable diferente y se
-  registra en el catálogo en el mismo cambio.
-- Las adaptaciones de datos de dominio se realizan en el consumidor; las
-  primitivas compartidas no conocen modelos de un área.
-
-<!-- Opcional: si el proyecto tiene una comprobación automatizada del catálogo
-(p. ej. un script que valida propiedades, fuentes y entrypoints), documéntala
-aquí en una sección "Verificación automática". -->
-```
-
----
-
-## Paso 8 — Configuración de Obsidian (opcional pero recomendado)
-
-Para que los `.base` rendericen como vistas, la bóveda debe abrirse con Obsidian
-y el core plugin **Bases** habilitado. Crea `{{BÓVEDA}}/.obsidian/` mínima:
-
-- `app.json` → `{}`
-- `appearance.json` → `{}`
-- `core-plugins.json` → habilita al menos `bases` (y los que el usuario quiera).
-
-No es imprescindible para que los agentes lean las notas (son Markdown plano),
-pero sí para la experiencia humana en Obsidian. Si el usuario no usa Obsidian,
-puedes omitir este paso; los `.base` seguirán siendo YAML legible.
-
----
-
-## Paso 9 — Verificación final
+## Verificación final
 
 En **modo ampliación**, comprueba solo lo relativo al sistema nuevo: que su
 carpeta, plantilla y `.base` existen, que el README ("Sistemas disponibles") e
@@ -784,4 +280,6 @@ Informa al usuario de qué se montó, qué quedó como plantilla y cuáles son l
    con vistas por estado. No proliferes formatos distintos.
 5. **Resúmenes autoexplicativos.** El `Resumen` de cada nota debe bastar para
    entenderla sin abrirla.
-```
+6. **Carga solo lo necesario.** Abre únicamente los ficheros de `references/` de
+   lo que vayas a montar; no cargues instrucciones de sistemas que el usuario no
+   ha pedido.
