@@ -6,20 +6,27 @@
 #   ↑/↓ mover · espacio marcar (multi) · enter confirmar
 #
 # No interactivo (variables de entorno):
-#   $env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,cursor'; $env:AKV_METHOD='symlink'; irm .../install.ps1 | iex
+#   $env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,codex'; $env:AKV_METHOD='symlink'; irm .../install.ps1 | iex
+#
+# Cada CLI escribe en su carpeta nativa y, además, siempre en el hub compartido
+# .agents/skills (que varios CLIs leen). Para proyectos en otra unidad que tu
+# perfil (p. ej. P:\) usa ámbito proyecto.
 $ErrorActionPreference = 'Stop'
 
 $SkillName = 'agentic-knowledge-vault'
 $RepoUrl   = 'https://github.com/danielperezmartinez/agentic-knowledge-vault.git'
 
+# Carpeta nativa de cada CLI (user/project). El hub neutral .agents/skills se
+# añade siempre aparte.
 $Agents = [ordered]@{
-  claude  = @{ label = 'Claude Code';    user = "$HOME/.claude/skills";  project = ".claude/skills" }
-  cursor  = @{ label = 'Cursor';         user = "$HOME/.cursor/skills";  project = ".cursor/skills" }
-  codex   = @{ label = 'Codex';          user = "$HOME/.codex/skills";   project = ".agents/skills" }
-  gemini  = @{ label = 'Gemini CLI';     user = "$HOME/.gemini/skills";  project = ".gemini/skills" }
-  copilot = @{ label = 'GitHub Copilot'; user = "$HOME/.copilot/skills"; project = ".github/skills" }
+  claude      = @{ label = 'Claude Code';           user = "$HOME/.claude/skills";  project = ".claude/skills" }
+  cursor      = @{ label = 'Cursor';                user = "$HOME/.cursor/skills";  project = ".cursor/skills" }
+  codex       = @{ label = 'Codex';                 user = "$HOME/.codex/skills";   project = ".agents/skills" }
+  antigravity = @{ label = 'Antigravity CLI (agy)'; user = "$HOME/.gemini/skills";  project = ".gemini/skills" }
+  copilot     = @{ label = 'GitHub Copilot';        user = "$HOME/.copilot/skills"; project = ".github/skills" }
 }
-$Order = @('claude', 'cursor', 'codex', 'gemini', 'copilot')
+$Order = @('claude', 'cursor', 'codex', 'antigravity', 'copilot')
+function Neutral-Dir($scope) { if ($scope -eq 'project') { ".agents/skills" } else { "$HOME/.agents/skills" } }
 
 try { $Interactive = -not [Console]::IsInputRedirected } catch { $Interactive = $false }
 
@@ -103,11 +110,11 @@ if ($env:AKV_AGENTS) {
   else {
     foreach ($tok in ($env:AKV_AGENTS -split ',')) {
       switch ($tok.Trim().ToLower()) {
-        { $_ -in @('1', 'claude', 'claude-code') } { $selected += 'claude' }
-        { $_ -in @('2', 'cursor') }                { $selected += 'cursor' }
-        { $_ -in @('3', 'codex') }                 { $selected += 'codex' }
-        { $_ -in @('4', 'gemini') }                { $selected += 'gemini' }
-        { $_ -in @('5', 'copilot') }               { $selected += 'copilot' }
+        { $_ -in @('1', 'claude', 'claude-code') }        { $selected += 'claude' }
+        { $_ -in @('2', 'cursor') }                       { $selected += 'cursor' }
+        { $_ -in @('3', 'codex') }                        { $selected += 'codex' }
+        { $_ -in @('4', 'antigravity', 'agy', 'gemini') } { $selected += 'antigravity' }
+        { $_ -in @('5', 'copilot') }                      { $selected += 'copilot' }
       }
     }
   }
@@ -119,7 +126,6 @@ if ($env:AKV_AGENTS) {
   $selected = @('claude')
 }
 
-# Conserva el orden canónico y elimina duplicados.
 $selected = $Order | Where-Object { $selected -contains $_ }
 if (-not $selected) { Write-Error "No se seleccionó ningún CLI. Nada que hacer."; return }
 
@@ -134,6 +140,12 @@ if (-not $Method) {
   } else { $Method = 'symlink' }
 }
 if ($Method -ne 'copy') { $Method = 'symlink' }
+
+# --- Carpetas destino (nativas + hub neutral), sin duplicados ---------------
+$dirs = @()
+foreach ($a in $selected) { $dirs += $Agents[$a].$Scope }
+$dirs += (Neutral-Dir $Scope)
+$dirs = $dirs | Select-Object -Unique
 
 # --- Origen del SKILL.md (repo local o clon temporal) -----------------------
 $TmpDir = $null
@@ -161,37 +173,39 @@ function Install-Copy([string]$dir) {
 
 try {
   Write-Host ""
-  Write-Host "Instalando '$SkillName' (ámbito: $Scope, método: $Method) en:"
+  Write-Host "Instalando '$SkillName' (ámbito: $Scope, método: $Method)"
+  Write-Host ("CLIs: " + ($selected -join ', '))
+  Write-Host "en estas carpetas:"
 
   if ($Method -eq 'copy') {
-    foreach ($a in $selected) {
-      $dest = Install-Copy $Agents[$a].$Scope
-      Write-Host ("  [ok] {0}: {1}" -f $Agents[$a].label, (Join-Path $dest 'SKILL.md'))
+    foreach ($d in $dirs) {
+      $dest = Install-Copy $d
+      Write-Host ("  [ok] " + (Join-Path $dest 'SKILL.md'))
     }
   } else {
     $canonical = $null
-    foreach ($a in $selected) {
+    foreach ($d in $dirs) {
       if (-not $canonical) {
-        $canonical = Install-Copy $Agents[$a].$Scope
-        Write-Host ("  [ok] {0} (canónica): {1}" -f $Agents[$a].label, (Join-Path $canonical 'SKILL.md'))
+        $canonical = Install-Copy $d
+        Write-Host ("  [ok] (canónica) " + (Join-Path $canonical 'SKILL.md'))
         continue
       }
-      $dir  = $Agents[$a].$Scope
-      $dest = Join-Path $dir $SkillName
-      New-Item -ItemType Directory -Force -Path $dir | Out-Null
+      $dest = Join-Path $d $SkillName
+      New-Item -ItemType Directory -Force -Path $d | Out-Null
       if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
       try {
         New-Item -ItemType SymbolicLink -Path $dest -Target $canonical -ErrorAction Stop | Out-Null
-        Write-Host ("  [ok] {0} (symlink): {1} -> {2}" -f $Agents[$a].label, $dest, $canonical)
+        Write-Host ("  [ok] (symlink)  {0} -> {1}" -f $dest, $canonical)
       } catch {
-        $dest = Install-Copy $dir
-        Write-Warning ("{0}: symlink no permitido (activa el Modo desarrollador); copiado en {1}" -f $Agents[$a].label, (Join-Path $dest 'SKILL.md'))
+        $dest = Install-Copy $d
+        Write-Warning ("symlink no permitido (activa el Modo desarrollador); copiado en " + (Join-Path $dest 'SKILL.md'))
       }
     }
   }
 
   Write-Host ""
   Write-Host "Listo. Invócalo en el CLI correspondiente (p. ej. /$SkillName en Claude Code)."
+  Write-Host "Nota: si tu proyecto está en otra unidad que tu perfil, usa ámbito proyecto."
 } finally {
   if ($TmpDir -and (Test-Path $TmpDir)) { Remove-Item -Recurse -Force $TmpDir }
 }

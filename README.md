@@ -77,28 +77,33 @@ Windows PowerShell:
 irm https://raw.githubusercontent.com/danielperezmartinez/agentic-knowledge-vault/main/install.ps1 | iex
 ```
 
-Supported CLIs and where the skill is placed (`<dir>/agentic-knowledge-vault/SKILL.md`):
+Each selected CLI is installed into its **native** folder **and** into the shared
+vendor-neutral `.agents/skills` hub (which several tools also read). Files land at
+`<dir>/agentic-knowledge-vault/SKILL.md`.
 
 | CLI | User (global) | Project |
 | --- | --- | --- |
 | Claude Code | `~/.claude/skills` | `.claude/skills` |
 | Cursor | `~/.cursor/skills` | `.cursor/skills` |
 | Codex | `~/.codex/skills` | `.agents/skills` |
-| Gemini CLI | `~/.gemini/skills` | `.gemini/skills` |
+| Antigravity CLI (`agy`) | `~/.gemini/skills` | `.gemini/skills` |
 | GitHub Copilot | `~/.copilot/skills` | `.github/skills` |
+| *(always, shared hub)* | `~/.agents/skills` | `.agents/skills` |
 
-> Some tools (e.g. Codex, Antigravity) also discover a project-level
-> `.agents/skills` by walking **up** from the project folder. A user-scope
-> install only reaches those tools when the project lives under your home
-> directory. If your projects are on a **different drive** than your user
-> profile (common on Windows, e.g. `P:\`), prefer a **project-scope** install in
-> each repo so the skill is found regardless of drive.
+> **Discovery is per-tool and even per-surface.** The *same* product often reads
+> a different folder in its terminal vs. its desktop app, and some tools find
+> `.agents/skills` only by walking **up** from the project folder (so a
+> home-based user install reaches them only for projects under your home
+> directory). Because of this, **no single user-scope install covers every
+> surface**. The one reliable, drive-independent method is a **project-scope**
+> install in each repo — strongly recommended when your projects live on a
+> different drive than your user profile (common on Windows, e.g. `P:\`).
 
 Non-interactive (CI / automation):
 
 ```bash
 # bash: flags
-./install.sh --scope user --agents claude,cursor,codex,gemini,copilot --method symlink
+./install.sh --scope user --agents claude,cursor,codex,antigravity,copilot --method symlink
 ./install.sh --scope project --agents all --method copy -y
 ```
 

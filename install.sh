@@ -6,8 +6,12 @@
 #   ↑/↓ mover · espacio marcar (multi) · enter confirmar
 #
 # No interactivo (CI / automatización):
-#   ./install.sh --scope user --agents claude,cursor,codex,gemini,copilot --method symlink
+#   ./install.sh --scope user --agents claude,cursor,codex,antigravity,copilot --method symlink
 #   ./install.sh --scope project --agents all --method copy -y
+#
+# Cada CLI escribe en su carpeta nativa y, además, siempre en el hub compartido
+# .agents/skills (que varios CLIs leen). Para proyectos en otra unidad que tu
+# perfil (p. ej. P:\ en Windows) usa --scope project.
 set -eu
 
 SKILL_NAME="agentic-knowledge-vault"
@@ -50,25 +54,28 @@ interactive=0
 [ "$have_tty" -eq 1 ] && [ "$ASSUME_YES" -eq 0 ] && interactive=1
 
 # --- Datos de agentes -------------------------------------------------------
-AGENT_ARR="claude cursor codex gemini copilot"
+AGENT_ARR="claude cursor codex antigravity copilot"
 agent_label() { case "$1" in
   claude) echo "Claude Code" ;; cursor) echo "Cursor" ;; codex) echo "Codex" ;;
-  gemini) echo "Gemini CLI" ;; copilot) echo "GitHub Copilot" ;; esac; }
-agent_dir() { case "$1:$2" in
-  claude:user)     echo "$HOME/.claude/skills" ;;
-  claude:project)  echo ".claude/skills" ;;
-  cursor:user)     echo "$HOME/.cursor/skills" ;;
-  cursor:project)  echo ".cursor/skills" ;;
-  codex:user)      echo "$HOME/.codex/skills" ;;
-  codex:project)   echo ".agents/skills" ;;
-  gemini:user)     echo "$HOME/.gemini/skills" ;;
-  gemini:project)  echo ".gemini/skills" ;;
-  copilot:user)    echo "$HOME/.copilot/skills" ;;
-  copilot:project) echo ".github/skills" ;;
+  antigravity) echo "Antigravity CLI (agy)" ;; copilot) echo "GitHub Copilot" ;; esac; }
+# Carpeta nativa de cada CLI (donde su global la busca).
+native_dir() { case "$1:$2" in
+  claude:user)         echo "$HOME/.claude/skills" ;;
+  claude:project)      echo ".claude/skills" ;;
+  cursor:user)         echo "$HOME/.cursor/skills" ;;
+  cursor:project)      echo ".cursor/skills" ;;
+  codex:user)          echo "$HOME/.codex/skills" ;;
+  codex:project)       echo ".agents/skills" ;;
+  antigravity:user)    echo "$HOME/.gemini/skills" ;;
+  antigravity:project) echo ".gemini/skills" ;;
+  copilot:user)        echo "$HOME/.copilot/skills" ;;
+  copilot:project)     echo ".github/skills" ;;
 esac; }
+# Hub neutral que leen varios CLIs (Claude Code, Codex, Antigravity…).
+neutral_dir() { case "$1" in user) echo "$HOME/.agents/skills" ;; project) echo ".agents/skills" ;; esac; }
 id_from_token() { case "$(echo "$1" | tr -d ' ' | tr 'A-Z' 'a-z')" in
   1|claude|claude-code) echo claude ;; 2|cursor) echo cursor ;; 3|codex) echo codex ;;
-  4|gemini) echo gemini ;; 5|copilot) echo copilot ;; *) echo "" ;;
+  4|antigravity|agy|gemini) echo antigravity ;; 5|copilot) echo copilot ;; *) echo "" ;;
 esac; }
 
 # --- Motor de menús por teclado (flechas) -----------------------------------
@@ -94,7 +101,6 @@ read_key() {
   esac
 }
 
-# menu_single "título" opción...  -> MENU_INDEX
 menu_single() {
   local title="$1"; shift
   local opts=("$@") n=$# cur=0 total=$(( $# + 2 )) i first=1
@@ -119,7 +125,6 @@ menu_single() {
   MENU_INDEX=$cur
 }
 
-# menu_multi "título" opción...  -> MENU_LIST (índices separados por espacio)
 menu_multi() {
   local title="$1"; shift
   local opts=("$@") n=$# cur=0 total=$(( $# + 2 )) i first=1 any box
@@ -173,14 +178,13 @@ if [ -n "$AGENTS_ARG" ]; then
   esac
 elif [ "$interactive" -eq 1 ]; then
   menu_multi "¿Para qué CLIs quieres instalar el skill?" \
-    "Claude Code" "Cursor" "Codex" "Gemini CLI" "GitHub Copilot"
+    "Claude Code" "Cursor" "Codex" "Antigravity CLI (agy)" "GitHub Copilot"
   set -- $AGENT_ARR
   for idx in $MENU_LIST; do eval "id=\${$((idx+1))}"; selected="$selected $id"; done
 else
   selected="claude"
 fi
 
-# Conserva el orden canónico y elimina duplicados.
 ordered=""
 for a in $AGENT_ARR; do
   case " $selected " in *" $a "*) ordered="$ordered $a" ;; esac
@@ -200,6 +204,19 @@ if [ -z "$METHOD" ]; then
   fi
 fi
 [ "$METHOD" = "copy" ] || METHOD="symlink"
+
+# --- Carpetas destino (nativas de cada CLI + hub neutral), sin duplicados ----
+dirs=()
+for a in $selected; do dirs+=("$(native_dir "$a" "$SCOPE")"); done
+dirs+=("$(neutral_dir "$SCOPE")")
+uniq_dirs=()
+for d in "${dirs[@]}"; do
+  dup=0
+  if [ "${#uniq_dirs[@]}" -gt 0 ]; then
+    for u in "${uniq_dirs[@]}"; do [ "$u" = "$d" ] && dup=1 && break; done
+  fi
+  [ "$dup" -eq 0 ] && uniq_dirs+=("$d")
+done
 
 # --- Origen del SKILL.md (repo local o clon temporal) -----------------------
 SRC_DIR=""
@@ -225,31 +242,34 @@ install_copy() { # install_copy <dir> -> ruta absoluta del skill
 }
 
 echo ""
-echo "Instalando '$SKILL_NAME' (ámbito: $SCOPE, método: $METHOD) en:"
+echo "Instalando '$SKILL_NAME' (ámbito: $SCOPE, método: $METHOD)"
+echo "CLIs: $selected"
+echo "en estas carpetas:"
 
 if [ "$METHOD" = "copy" ]; then
-  for a in $selected; do
-    dest="$(install_copy "$(agent_dir "$a" "$SCOPE")")"
-    echo "  ✓ $(agent_label "$a"): $dest/SKILL.md"
+  for d in "${uniq_dirs[@]}"; do
+    dest="$(install_copy "$d")"
+    echo "  ✓ $dest/SKILL.md"
   done
 else
   canonical=""
-  for a in $selected; do
+  for d in "${uniq_dirs[@]}"; do
     if [ -z "$canonical" ]; then
-      canonical="$(install_copy "$(agent_dir "$a" "$SCOPE")")"
-      echo "  ✓ $(agent_label "$a") (canónica): $canonical/SKILL.md"
+      canonical="$(install_copy "$d")"
+      echo "  ✓ (canónica) $canonical/SKILL.md"
       continue
     fi
-    dir="$(agent_dir "$a" "$SCOPE")"; dest="$dir/$SKILL_NAME"
-    mkdir -p "$dir"; rm -rf "$dest" 2>/dev/null || true
+    dest="$d/$SKILL_NAME"
+    mkdir -p "$d"; rm -rf "$dest" 2>/dev/null || true
     if ln -s "$canonical" "$dest" 2>/dev/null; then
-      echo "  ✓ $(agent_label "$a") (symlink): $dest -> $canonical"
+      echo "  ✓ (symlink)  $dest -> $canonical"
     else
-      dest="$(install_copy "$dir")"
-      echo "  ! $(agent_label "$a"): symlink no permitido; copiado en $dest/SKILL.md"
+      dest="$(install_copy "$d")"
+      echo "  ! symlink no permitido; copiado en $dest/SKILL.md"
     fi
   done
 fi
 
 echo ""
 echo "Listo. Invócalo en el CLI correspondiente (p. ej. /$SKILL_NAME en Claude Code)."
+echo "Nota: si tu proyecto está en otra unidad que tu perfil, usa --scope project."

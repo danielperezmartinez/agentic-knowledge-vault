@@ -81,29 +81,34 @@ Windows PowerShell:
 irm https://raw.githubusercontent.com/danielperezmartinez/agentic-knowledge-vault/main/install.ps1 | iex
 ```
 
-CLIs soportados y dónde se coloca el skill (`<dir>/agentic-knowledge-vault/SKILL.md`):
+Cada CLI seleccionado se instala en su carpeta **nativa** **y** en el hub neutral
+compartido `.agents/skills` (que varios CLIs también leen). Los ficheros quedan en
+`<dir>/agentic-knowledge-vault/SKILL.md`.
 
 | CLI | Usuario (global) | Proyecto |
 | --- | --- | --- |
 | Claude Code | `~/.claude/skills` | `.claude/skills` |
 | Cursor | `~/.cursor/skills` | `.cursor/skills` |
 | Codex | `~/.codex/skills` | `.agents/skills` |
-| Gemini CLI | `~/.gemini/skills` | `.gemini/skills` |
+| Antigravity CLI (`agy`) | `~/.gemini/skills` | `.gemini/skills` |
 | GitHub Copilot | `~/.copilot/skills` | `.github/skills` |
+| *(siempre, hub compartido)* | `~/.agents/skills` | `.agents/skills` |
 
-> Algunos CLIs (p. ej. Codex, Antigravity) descubren un `.agents/skills` de
-> proyecto **subiendo** por el árbol de carpetas desde el proyecto. Una
-> instalación de ámbito usuario solo llega a esos CLIs cuando el proyecto cuelga
-> de tu carpeta de usuario. Si tus proyectos están en una **unidad distinta** a
-> la de tu perfil (habitual en Windows, p. ej. `P:\`), usa una instalación de
-> ámbito **proyecto** en cada repo para que la skill se encuentre en cualquier
-> unidad.
+> **El descubrimiento es por herramienta e incluso por superficie.** El *mismo*
+> producto suele leer una carpeta distinta en su terminal que en su app de
+> escritorio, y algunos CLIs encuentran `.agents/skills` solo **subiendo** desde
+> el proyecto (así que una instalación de usuario en tu home solo les llega para
+> proyectos que cuelgan de tu carpeta de usuario). Por eso **ninguna instalación
+> de ámbito usuario cubre todas las superficies**. El único método fiable e
+> independiente de la unidad es la instalación de ámbito **proyecto** en cada
+> repo — muy recomendada si tus proyectos viven en una unidad distinta a la de tu
+> perfil (habitual en Windows, p. ej. `P:\`).
 
 No interactivo (CI / automatización):
 
 ```bash
 # bash: flags
-./install.sh --scope user --agents claude,cursor,codex,gemini,copilot --method symlink
+./install.sh --scope user --agents claude,cursor,codex,antigravity,copilot --method symlink
 ./install.sh --scope project --agents all --method copy -y
 ```
 
