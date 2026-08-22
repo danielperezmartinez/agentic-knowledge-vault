@@ -41,7 +41,7 @@ For Claude (terminal + desktop app), install it as a plugin:
 
 ```
 /plugin marketplace add danielperezmartinez/agentic-knowledge-vault
-/plugin install agentic-knowledge-vault@agentic-knowledge-vault
+/plugin install agentic-knowledge-vault@danielperezmartinez
 ```
 
 For other CLIs (Codex, Antigravity `agy`, Cursor, Copilot), use the one-command

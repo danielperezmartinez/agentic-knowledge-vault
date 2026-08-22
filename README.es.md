@@ -68,7 +68,7 @@ skills de disco), y también funciona en el terminal de Claude Code:
 
 ```
 /plugin marketplace add danielperezmartinez/agentic-knowledge-vault
-/plugin install agentic-knowledge-vault@agentic-knowledge-vault
+/plugin install agentic-knowledge-vault@danielperezmartinez
 ```
 
 ### Otros CLIs — instalador interactivo
@@ -135,7 +135,7 @@ $env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,cursor'; $env:AKV_METHOD='symlink
 
 ### Actualizar
 
-- **Plugin (Claude)** — `/plugin marketplace update agentic-knowledge-vault` y
+- **Plugin (Claude)** — `/plugin marketplace update danielperezmartinez` y
   reinstala el plugin si ofrece versión nueva.
 - **Instalador (symlink)** — reejecuta el instalador; solo cambia la copia
   canónica y todos los CLIs enlazados la ven.
