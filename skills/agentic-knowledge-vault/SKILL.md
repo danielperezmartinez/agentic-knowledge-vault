@@ -115,8 +115,8 @@ En modo ampliación, ofrece solo los sistemas que aún no estén montados.
   consecuencias. Tiene su propio `.base`.
 - **Decisiones visuales y de estilos** — acuerdos sobre lenguaje visual, tokens,
   componentes. Puede compartir patrón con ADR o ser una lista más ligera.
-- **Catálogo técnico** — índice de la superficie pública reutilizable (UI,
-  servicios, contratos). No usa `.base`; es una nota-índice con tabla Markdown.
+- **Catálogo técnico** — superficie pública reutilizable (UI, servicios,
+  contratos). Carpeta de notas estructuradas por pieza + `.base` + nota-índice.
 - **Otros** — pregunta libre por sistemas adicionales que el usuario quiera.
 
 ### Pregunta 3 — ¿Rellenar el andamio ahora o dejarlo como plantilla? · _ambos modos_
@@ -267,7 +267,9 @@ no puede leerse, el agente debe detenerse e informar al usuario.
 
 ## Paso 3 — El nexo de navegación: `{{BÓVEDA}}/Inicio.md`
 
-Enlaza cada sistema montado. Usa `embed` (`![[...]]`) del `.base` para previsualizar.
+Enlaza cada sistema montado con una **referencia al `.base`** (o a la nota-índice).
+**No incrustes vistas** (`![[...#Todo]]`): un preview de la tabla es ruido para el
+agente y, si el sistema crece, hace el archivo ineficiente. Deja solo los enlaces.
 
 ```markdown
 # Inicio
@@ -280,10 +282,8 @@ Este es el nexo de navegación de la memoria del proyecto.
 
 [[Tareas/Tareas.base|Abrir el panel de tareas]]
 
-![[Tareas/Tareas.base#Todo]]
-
 <!-- Añade aquí una sección por cada sistema montado (ADR, Decisiones
-visuales, Catálogo técnico...). -->
+visuales, Catálogo técnico...), solo con el enlace a su .base o nota-índice. -->
 
 ## Próximos sistemas
 
@@ -560,26 +560,131 @@ principio de frontmatter YAML + `.base`.
 
 ## Paso 7 — Catálogo técnico (opcional)
 
-No usa `.base`. Es **una sola nota-índice** (`{{BÓVEDA}}/Catálogo técnico.md`)
-con una tabla Markdown de la superficie pública reutilizable. La implementación
-sigue siendo la fuente de verdad técnica; el catálogo solo indexa.
+Móntalo solo si el usuario lo eligió. Sigue **el mismo principio que Tareas/ADR**:
+una carpeta de notas estructuradas con frontmatter YAML (una por pieza
+reutilizable) + un `.base` que las indexa, **más** una nota-índice fuera de la
+carpeta. Cada nota es un puntero corto: la **implementación** sigue siendo la
+fuente de verdad técnica del contrato.
+
+Estructura:
+
+- `{{BÓVEDA}}/Catálogo técnico/` — una nota por pieza + `Catálogo técnico.base`.
+- `{{BÓVEDA}}/Catálogo técnico.md` — nota-índice (enlace al `.base` + cómo usarlo
+  + política de evolución).
+
+### 7a. Plantilla de nota de pieza
+
+Nombre de fichero = nombre de la pieza (`DataListComponent.md`, `.ui-button`
+→ `ui-button.md`). Frontmatter (adapta los vocabularios a tu proyecto):
+
+```markdown
+---
+Nombre: "<NombreDeLaPieza>"
+Tipo: "<Componente | Servicio | Fachada | Directiva | Utilidad | Primitiva CSS | Token | Guard>"
+Área: "<Global | ... según tu taxonomía>"
+Feature: "<Shared UI | ... según tu taxonomía>"
+Estado: "Vigente"
+Ámbito: "<Aplicación | Feature | Shell>"
+Fuente: "<ruta/a/la/implementación>"
+Entrada pública: "<entrypoint de import, si aplica>"
+Resumen: "<Qué hace y su contrato, entendible sin abrir la fuente.>"
+Última modificación: "<AAAA-MM-DDTHH:mm:ss+ZZ:ZZ>"
+---
+
+# <NombreDeLaPieza>
+
+Después de descubrir esta pieza en el catálogo, consulta [su implementación](<ruta relativa a la fuente>)
+como fuente de verdad de su contrato detallado.
+```
+
+Reglas de estado (documéntalas en el README, sección Catálogo técnico):
+
+- `Estado` ∈ `Vigente` · `En revisión` · `Obsoleta`. Se evita depender de piezas
+  `En revisión` salvo que el trabajo incluya estabilizarlas.
+- Se añade o actualiza la entrada **en el mismo cambio** que crea o altera una
+  superficie reutilizable.
+- `Tipo`, `Área`, `Feature` y `Ámbito` son vocabularios propios del proyecto:
+  defínelos con el usuario y mantenlos consistentes.
+
+### 7b. Índice `Catálogo técnico.base`
+
+```yaml
+filters:
+  and:
+    - file.inFolder("Catálogo técnico")
+    - file.ext == "md"
+    - Nombre != null
+properties:
+  file.name:
+    displayName: Pieza
+  Tipo: { displayName: Tipo }
+  Área: { displayName: Área }
+  Feature: { displayName: Feature }
+  Estado: { displayName: Estado }
+  Ámbito: { displayName: Ámbito }
+  Resumen: { displayName: Propósito y contrato }
+  Fuente: { displayName: Fuente }
+  Entrada pública: { displayName: Entrada pública }
+views:
+  - type: table
+    name: Todo
+    order: [file.name, Tipo, Área, Feature, Estado, Ámbito, Resumen, Fuente, Entrada pública]
+    sort:
+      - property: Área
+        direction: ASC
+      - property: Feature
+        direction: ASC
+      - property: Nombre
+        direction: ASC
+  - type: table
+    name: Vigentes
+    filters:
+      and:
+        - Estado == "Vigente"
+    order: [file.name, Tipo, Área, Feature, Ámbito, Resumen, Fuente, Entrada pública]
+  - type: table
+    name: En revisión
+    filters:
+      and:
+        - Estado == "En revisión"
+    order: [file.name, Tipo, Área, Feature, Resumen, Fuente]
+```
+
+Añade vistas filtradas propias del proyecto cuando aporten (p. ej. por `Feature`,
+por `Área` o por `Tipo`), siguiendo el mismo patrón.
+
+### 7c. Nota-índice `Catálogo técnico.md`
 
 ```markdown
 # Catálogo técnico
 
-Este índice presenta la superficie pública reutilizable de {{PROYECTO}}. Antes de
-crear una nueva pieza se consulta este catálogo y después se abre su
+Este sistema permite descubrir la superficie reutilizable de {{PROYECTO}} antes de
+buscar por todo el repositorio o crear una implementación nueva. Cada fila enlaza
+con su nota estructurada; después de localizar una candidata se abre su
 implementación, que continúa siendo la fuente de verdad técnica.
 
-| Pieza | Propósito y contrato | Ámbito | Fuente |
-| --- | --- | --- | --- |
-| <Componente> | <Qué hace y su contrato.> | <Aplicación/Feature/...> | `<ruta>` |
+[[Catálogo técnico/Catálogo técnico.base|Abrir la vista completa del catálogo]]
+
+## Cómo utilizarlo
+
+1. Filtrar la vista por tipo, área, feature o estado.
+2. Evitar las piezas `En revisión` salvo que el trabajo incluya estabilizarlas.
+3. Abrir la fuente antes de depender de los detalles del contrato o modificarla.
+4. Añadir o actualizar la entrada en el mismo cambio que altere una superficie
+   reutilizable.
 
 ## Política de evolución
 
-- Se amplía una pieza existente cuando el nuevo caso conserva su responsabilidad.
-- Se crea una pieza nueva solo cuando representa un patrón estable distinto; se
-  añade a este catálogo en el mismo cambio que la introduce.
+- Se amplía una pieza existente cuando el nuevo caso conserva su responsabilidad y
+  un contrato claro.
+- Se crea una pieza nueva solo cuando representa un patrón estable diferente y se
+  registra en el catálogo en el mismo cambio.
+- Las adaptaciones de datos de dominio se realizan en el consumidor; las
+  primitivas compartidas no conocen modelos de un área.
+
+<!-- Opcional: si el proyecto tiene una comprobación automatizada del catálogo
+(p. ej. un script que valida propiedades, fuentes y entrypoints), documéntala
+aquí en una sección "Verificación automática". -->
 ```
 
 ---
@@ -613,7 +718,8 @@ En **modo montaje inicial**, comprueba todo lo siguiente:
 - [ ] `{{BÓVEDA}}/README.md` contiene el protocolo obligatorio, las convenciones,
       la lista de sistemas montados y la sección de reglas (rellenas o como
       plantilla, según lo acordado).
-- [ ] `{{BÓVEDA}}/Inicio.md` enlaza cada sistema montado.
+- [ ] `{{BÓVEDA}}/Inicio.md` enlaza cada sistema montado **solo con referencias**
+      a su `.base`/nota-índice, sin incrustar vistas (`![[...#Todo]]`).
 - [ ] Cada sistema con `.base` tiene su carpeta, al menos su plantilla y su
       fichero `.base` con la vista `Todo`.
 - [ ] Todas las fechas usan formato ISO; los wikilinks resuelven.
