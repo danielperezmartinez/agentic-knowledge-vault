@@ -21,10 +21,10 @@ $ClaudeUserDir = if ($env:CLAUDE_CONFIG_DIR) { Join-Path $env:CLAUDE_CONFIG_DIR 
 
 # Carpeta nativa de cada CLI (user/project).
 $Agents = [ordered]@{
-  claude      = @{ label = 'Claude Code';           user = $ClaudeUserDir;          project = ".claude/skills" }
-  cursor      = @{ label = 'Cursor';                user = "$HOME/.cursor/skills";  project = ".cursor/skills" }
-  codex       = @{ label = 'Codex';                 user = "$HOME/.codex/skills";   project = ".agents/skills" }
-  antigravity = @{ label = 'Antigravity CLI (agy)'; user = "$HOME/.gemini/skills";  project = ".gemini/skills" }
+  claude      = @{ label = 'Claude Code (terminal)';          user = $ClaudeUserDir;          project = ".claude/skills" }
+  cursor      = @{ label = 'Cursor';                          user = "$HOME/.cursor/skills";  project = ".cursor/skills" }
+  codex       = @{ label = 'Codex';                           user = "$HOME/.codex/skills";   project = ".agents/skills" }
+  antigravity = @{ label = 'Antigravity CLI (agy, terminal)'; user = "$HOME/.gemini/skills";  project = ".gemini/skills" }
   copilot     = @{ label = 'GitHub Copilot';        user = "$HOME/.copilot/skills"; project = ".github/skills" }
 }
 $Order = @('claude', 'cursor', 'codex', 'antigravity', 'copilot')
@@ -143,18 +143,19 @@ if (-not $Method) {
 if ($Method -ne 'copy') { $Method = 'symlink' }
 
 # --- Origen del SKILL.md (repo local o clon temporal) -----------------------
+# El skill vive en skills/<name>/SKILL.md (estructura de plugin).
+$Rel = Join-Path 'skills' (Join-Path $SkillName 'SKILL.md')
 $TmpDir = $null
-if (Test-Path 'SKILL.md') {
-  $SrcDir = (Get-Location).Path
-} elseif ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot 'SKILL.md'))) {
-  $SrcDir = $PSScriptRoot
+if (Test-Path $Rel) {
+  $SrcSkill = (Resolve-Path $Rel).Path
+} elseif ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot $Rel))) {
+  $SrcSkill = (Resolve-Path (Join-Path $PSScriptRoot $Rel)).Path
 } else {
   $TmpDir = Join-Path ([System.IO.Path]::GetTempPath()) ("akv-" + [System.Guid]::NewGuid().ToString('N'))
   Write-Host "Descargando el skill…"
   git clone --depth 1 $RepoUrl $TmpDir *> $null
-  $SrcDir = $TmpDir
+  $SrcSkill = Join-Path $TmpDir $Rel
 }
-$SrcSkill = Join-Path $SrcDir 'SKILL.md'
 if (-not (Test-Path $SrcSkill)) { Write-Error "No se encontró SKILL.md en el origen."; return }
 
 # --- Instalación ------------------------------------------------------------

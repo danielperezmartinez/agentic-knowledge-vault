@@ -1,0 +1,11 @@
+{
+  "name": "agentic-knowledge-vault",
+  "version": "1.0.0",
+  "description": "Skill que andamia una bóveda de conocimiento compartida (fuente de verdad, documentación viva y memoria) para humanos y agentes/CLIs, con modos de montaje inicial y ampliación.",
+  "author": {
+    "name": "Daniel Pérez Martínez"
+  },
+  "homepage": "https://github.com/danielperezmartinez/agentic-knowledge-vault",
+  "license": "MIT",
+  "keywords": ["skill", "memory", "obsidian", "documentation", "adr", "knowledge-vault"]
+}

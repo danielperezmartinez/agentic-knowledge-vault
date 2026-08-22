@@ -57,17 +57,26 @@ hacen que el sistema montado sea respetado por cualquier agente que los lea.
 
 ## Instalación
 
-### Recomendado — instalador interactivo
+Este repositorio es a la vez un **skill** instalable (en `skills/`) y un **plugin
+/ marketplace de Claude**. Elige la vía según tu herramienta.
 
-El instalador pregunta **qué ámbito** (usuario/global o el proyecto actual),
-**para qué CLIs** quieres el skill (multi-selección) y **qué método** — *symlink*
-(recomendado: una copia canónica y el resto enlazado, así actualizar una
-actualiza todas) o *copia* (una copia independiente por CLI). Después crea el
-skill en el directorio que cada CLI seleccionado espera. Funciona tanto en local
-como por tubería.
+### Claude (terminal + app de escritorio) — vía plugin *(recomendado para Claude)*
 
-> En Windows, los symlinks requieren Modo desarrollador (o admin); si no está
-> disponible, el instalador cae automáticamente a copia y te avisa.
+En Claude Code, añade este repo como marketplace e instala el plugin. Es la
+**única vía que llega a la app de escritorio de Claude** (que no lee carpetas de
+skills de disco), y también funciona en el terminal de Claude Code:
+
+```
+/plugin marketplace add danielperezmartinez/agentic-knowledge-vault
+/plugin install agentic-knowledge-vault@agentic-knowledge-vault
+```
+
+### Otros CLIs — instalador interactivo
+
+Para Codex, Antigravity CLI (`agy`), Cursor, GitHub Copilot — y el terminal de
+Claude Code, si prefieres ficheros al plugin — usa el instalador. Pregunta
+**ámbito** (usuario/proyecto), **qué CLIs** (multi-selección) y **método** —
+*symlink* (recomendado) o *copia* — y escribe el skill en la carpeta de cada CLI.
 
 macOS / Linux / Git Bash:
 
@@ -81,29 +90,28 @@ Windows PowerShell:
 irm https://raw.githubusercontent.com/danielperezmartinez/agentic-knowledge-vault/main/install.ps1 | iex
 ```
 
-Cada CLI seleccionado se instala en la carpeta que ese CLI lee. Los ficheros
-quedan en `<dir>/agentic-knowledge-vault/SKILL.md`.
+> En Windows, los symlinks requieren Modo desarrollador (o admin); si no está
+> disponible, el instalador cae automáticamente a copia y te avisa.
 
-| CLI | Usuario (global) | Proyecto |
-| --- | --- | --- |
-| Claude Code | `~/.claude/skills` | `.claude/skills` |
-| Cursor | `~/.cursor/skills` | `.cursor/skills` |
-| Codex | `~/.codex/skills` | `.agents/skills` |
-| Antigravity CLI (`agy`) | `~/.gemini/skills` | `.gemini/skills` |
-| GitHub Copilot | `~/.copilot/skills` | `.github/skills` |
+Dónde lee cada CLI el skill (`<dir>/agentic-knowledge-vault/SKILL.md`):
+
+| CLI | Usuario (global) | Proyecto | Superficie |
+| --- | --- | --- | --- |
+| Claude Code | `$CLAUDE_CONFIG_DIR/skills` o `~/.claude/skills` | `.claude/skills` | terminal (para la **app**, usa el plugin de arriba) |
+| Cursor | `~/.cursor/skills` | `.cursor/skills` | — |
+| Codex | `~/.codex/skills` | `.agents/skills` | app de escritorio; **terminal** vía ámbito proyecto |
+| Antigravity CLI (`agy`) | `~/.gemini/skills` | `.gemini/skills` | solo terminal (su IDE de escritorio no se cubre aquí) |
+| GitHub Copilot | `~/.copilot/skills` | `.github/skills` | — |
 
 > **El descubrimiento es por herramienta e incluso por superficie.** El *mismo*
 > producto suele leer una carpeta distinta en terminal que en su app de
-> escritorio: p. ej. **Claude Code** (terminal) lee solo `~/.claude/skills`,
-> mientras que la **app de escritorio de Claude** no usa estas carpetas de disco
-> — usa las skills habilitadas en tu cuenta de claude.ai (Customize). Algunos
-> CLIs encuentran `.agents/skills` solo **subiendo** desde el proyecto, así que
-> una instalación de usuario en tu home solo les llega para proyectos que cuelgan
-> de tu carpeta de usuario. Por eso **ninguna instalación de ámbito usuario cubre
-> todas las superficies**. El único método fiable e independiente de la unidad es
-> la instalación de ámbito **proyecto** en cada repo — muy recomendada si tus
-> proyectos viven en una unidad distinta a la de tu perfil (habitual en Windows,
-> p. ej. `P:\`).
+> escritorio, y algunos CLIs encuentran `.agents/skills` solo **subiendo** desde
+> el proyecto (así que una instalación de usuario en tu home solo les llega para
+> proyectos que cuelgan de tu carpeta de usuario). Por eso **ninguna instalación
+> de ámbito usuario cubre todas las superficies**. El único método fiable e
+> independiente de la unidad es la instalación de ámbito **proyecto** en cada
+> repo — muy recomendada si tus proyectos viven en una unidad distinta a la de tu
+> perfil (habitual en Windows, p. ej. `P:\`).
 >
 > Si defines `CLAUDE_CONFIG_DIR`, Claude Code lee las skills de usuario de
 > `$CLAUDE_CONFIG_DIR/skills` (no de `~/.claude/skills`). El instalador lo
@@ -125,22 +133,14 @@ $env:AKV_SCOPE='user'; $env:AKV_AGENTS='claude,cursor'; $env:AKV_METHOD='symlink
 > El patrón `curl … | bash` / `irm … | iex` ejecuta un script remoto; ambos
 > scripts son cortos y auditables en este repo antes de ejecutarlos.
 
-### Manual — `git clone` (solo Claude Code)
-
-Si solo usas Claude Code, basta con clonar en su carpeta de skills:
-
-```bash
-git clone https://github.com/danielperezmartinez/agentic-knowledge-vault.git ~/.claude/skills/agentic-knowledge-vault
-```
-
 ### Actualizar
 
+- **Plugin (Claude)** — `/plugin marketplace update agentic-knowledge-vault` y
+  reinstala el plugin si ofrece versión nueva.
 - **Instalador (symlink)** — reejecuta el instalador; solo cambia la copia
-  canónica y todos los CLIs enlazados la ven. También puedes editar directamente
-  el `SKILL.md` canónico y todos los enlaces lo reflejan.
+  canónica y todos los CLIs enlazados la ven.
 - **Instalador (copia)** — reejecuta el instalador para refrescar la copia de
   cada CLI.
-- **`git clone` manual** — `git -C <carpeta-instalada> pull`.
 
 ### Usarlo
 

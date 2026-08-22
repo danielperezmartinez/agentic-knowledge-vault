@@ -56,8 +56,8 @@ interactive=0
 # --- Datos de agentes -------------------------------------------------------
 AGENT_ARR="claude cursor codex antigravity copilot"
 agent_label() { case "$1" in
-  claude) echo "Claude Code" ;; cursor) echo "Cursor" ;; codex) echo "Codex" ;;
-  antigravity) echo "Antigravity CLI (agy)" ;; copilot) echo "GitHub Copilot" ;; esac; }
+  claude) echo "Claude Code (terminal)" ;; cursor) echo "Cursor" ;; codex) echo "Codex" ;;
+  antigravity) echo "Antigravity CLI (agy, terminal)" ;; copilot) echo "GitHub Copilot" ;; esac; }
 # Carpeta nativa de cada CLI (donde su global la busca).
 native_dir() { case "$1:$2" in
   claude:user)         echo "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills" ;;
@@ -176,7 +176,7 @@ if [ -n "$AGENTS_ARG" ]; then
   esac
 elif [ "$interactive" -eq 1 ]; then
   menu_multi "¿Para qué CLIs quieres instalar el skill?" \
-    "Claude Code" "Cursor" "Codex" "Antigravity CLI (agy)" "GitHub Copilot"
+    "Claude Code (terminal)" "Cursor" "Codex" "Antigravity CLI (agy, terminal)" "GitHub Copilot"
   set -- $AGENT_ARR
   for idx in $MENU_LIST; do eval "id=\${$((idx+1))}"; selected="$selected $id"; done
 else
@@ -204,25 +204,27 @@ fi
 [ "$METHOD" = "copy" ] || METHOD="symlink"
 
 # --- Origen del SKILL.md (repo local o clon temporal) -----------------------
-SRC_DIR=""
-if [ -f "SKILL.md" ]; then
-  SRC_DIR="$(pwd)"
-elif [ -n "${BASH_SOURCE:-}" ] && [ -f "$(dirname "${BASH_SOURCE:-}")/SKILL.md" ]; then
-  SRC_DIR="$(cd "$(dirname "${BASH_SOURCE}")" && pwd)"
+# El skill vive en skills/<name>/SKILL.md (estructura de plugin).
+REL="skills/$SKILL_NAME/SKILL.md"
+SRC_SKILL=""
+if [ -f "$REL" ]; then
+  SRC_SKILL="$(cd "$(dirname "$REL")" && pwd)/SKILL.md"
+elif [ -n "${BASH_SOURCE:-}" ] && [ -f "$(dirname "${BASH_SOURCE:-}")/$REL" ]; then
+  SRC_SKILL="$(cd "$(dirname "${BASH_SOURCE}")/skills/$SKILL_NAME" && pwd)/SKILL.md"
 else
   CLEANUP_TMP="$(mktemp -d)"
   echo "Descargando el skill…"
   git clone --depth 1 "$REPO_URL" "$CLEANUP_TMP" >/dev/null 2>&1
-  SRC_DIR="$CLEANUP_TMP"
+  SRC_SKILL="$CLEANUP_TMP/$REL"
 fi
-[ -f "$SRC_DIR/SKILL.md" ] || { echo "No se encontró SKILL.md en el origen." >&2; exit 1; }
+[ -f "$SRC_SKILL" ] || { echo "No se encontró SKILL.md en el origen." >&2; exit 1; }
 
 # --- Instalación ------------------------------------------------------------
 install_copy() { # install_copy <dir> -> ruta absoluta del skill
   local dest="$1/$SKILL_NAME"
   rm -rf "$dest" 2>/dev/null || true
   mkdir -p "$dest"
-  cp "$SRC_DIR/SKILL.md" "$dest/SKILL.md"
+  cp "$SRC_SKILL" "$dest/SKILL.md"
   ( cd "$dest" && pwd )
 }
 

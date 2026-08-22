@@ -38,13 +38,18 @@ nunca copias paralelas; se enlaza al origen con wikilinks.
 
 ## Instalación
 
-```bash
-git clone https://github.com/danielperezmartinez/agentic-knowledge-vault.git ~/.claude/skills/agentic-knowledge-vault
+Para Claude (terminal + app de escritorio), instálala como plugin:
+
+```
+/plugin marketplace add danielperezmartinez/agentic-knowledge-vault
+/plugin install agentic-knowledge-vault@agentic-knowledge-vault
 ```
 
-Luego invoca `/agentic-knowledge-vault` y sigue la entrevista. Las instrucciones
-completas y los scripts de instalación de un comando están en el
+Para otros CLIs (Codex, Antigravity `agy`, Cursor, Copilot), usa el instalador de
+un comando. Las instrucciones completas están en el
 [README de GitHub](https://github.com/danielperezmartinez/agentic-knowledge-vault/blob/main/README.es.md#instalaci%C3%B3n).
+
+Luego invoca `/agentic-knowledge-vault` y sigue la entrevista.
 
 ## Licencia
 
