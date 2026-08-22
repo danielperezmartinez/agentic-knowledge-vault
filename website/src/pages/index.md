@@ -40,7 +40,7 @@ copies; link to the origin with wikilinks.
 For Claude (terminal + desktop app), install it as a plugin:
 
 ```
-/plugin marketplace add danielperezmartinez/agentic-knowledge-vault
+/plugin marketplace add danielperezmartinez/dlperezmartinez-claude-marketplace
 /plugin install agentic-knowledge-vault@danielperezmartinez
 ```
 

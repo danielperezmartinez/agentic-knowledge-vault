@@ -41,7 +41,7 @@ nunca copias paralelas; se enlaza al origen con wikilinks.
 Para Claude (terminal + app de escritorio), instálala como plugin:
 
 ```
-/plugin marketplace add danielperezmartinez/agentic-knowledge-vault
+/plugin marketplace add danielperezmartinez/dlperezmartinez-claude-marketplace
 /plugin install agentic-knowledge-vault@danielperezmartinez
 ```
 

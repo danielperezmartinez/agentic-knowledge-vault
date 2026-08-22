@@ -64,7 +64,7 @@ the **only route that reaches the Claude desktop app** (which does not read
 filesystem skill folders), and it also works in the Claude Code terminal:
 
 ```
-/plugin marketplace add danielperezmartinez/agentic-knowledge-vault
+/plugin marketplace add danielperezmartinez/dlperezmartinez-claude-marketplace
 /plugin install agentic-knowledge-vault@danielperezmartinez
 ```
 

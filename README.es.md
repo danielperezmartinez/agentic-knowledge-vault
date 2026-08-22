@@ -67,7 +67,7 @@ En Claude Code, añade este repo como marketplace e instala el plugin. Es la
 skills de disco), y también funciona en el terminal de Claude Code:
 
 ```
-/plugin marketplace add danielperezmartinez/agentic-knowledge-vault
+/plugin marketplace add danielperezmartinez/dlperezmartinez-claude-marketplace
 /plugin install agentic-knowledge-vault@danielperezmartinez
 ```
 
