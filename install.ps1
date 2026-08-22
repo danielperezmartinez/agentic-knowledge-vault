@@ -16,10 +16,12 @@ $ErrorActionPreference = 'Stop'
 $SkillName = 'agentic-knowledge-vault'
 $RepoUrl   = 'https://github.com/danielperezmartinez/agentic-knowledge-vault.git'
 
-# Carpeta nativa de cada CLI (user/project). El hub neutral .agents/skills se
-# añade siempre aparte.
+# Claude Code respeta CLAUDE_CONFIG_DIR (si está, sus skills viven ahí, no en ~/.claude).
+$ClaudeUserDir = if ($env:CLAUDE_CONFIG_DIR) { Join-Path $env:CLAUDE_CONFIG_DIR 'skills' } else { "$HOME/.claude/skills" }
+
+# Carpeta nativa de cada CLI (user/project).
 $Agents = [ordered]@{
-  claude      = @{ label = 'Claude Code';           user = "$HOME/.claude/skills";  project = ".claude/skills" }
+  claude      = @{ label = 'Claude Code';           user = $ClaudeUserDir;          project = ".claude/skills" }
   cursor      = @{ label = 'Cursor';                user = "$HOME/.cursor/skills";  project = ".cursor/skills" }
   codex       = @{ label = 'Codex';                 user = "$HOME/.codex/skills";   project = ".agents/skills" }
   antigravity = @{ label = 'Antigravity CLI (agy)'; user = "$HOME/.gemini/skills";  project = ".gemini/skills" }

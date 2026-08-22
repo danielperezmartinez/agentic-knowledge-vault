@@ -60,7 +60,7 @@ agent_label() { case "$1" in
   antigravity) echo "Antigravity CLI (agy)" ;; copilot) echo "GitHub Copilot" ;; esac; }
 # Carpeta nativa de cada CLI (donde su global la busca).
 native_dir() { case "$1:$2" in
-  claude:user)         echo "$HOME/.claude/skills" ;;
+  claude:user)         echo "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills" ;;
   claude:project)      echo ".claude/skills" ;;
   cursor:user)         echo "$HOME/.cursor/skills" ;;
   cursor:project)      echo ".cursor/skills" ;;

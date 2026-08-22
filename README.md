@@ -99,6 +99,10 @@ Each selected CLI is installed into the folder it reads. Files land at
 > **project-scope** install in each repo — strongly recommended when your
 > projects live on a different drive than your user profile (common on Windows,
 > e.g. `P:\`).
+>
+> If you set `CLAUDE_CONFIG_DIR`, Claude Code reads user skills from
+> `$CLAUDE_CONFIG_DIR/skills` (not `~/.claude/skills`). The installer honors it
+> automatically.
 
 Non-interactive (CI / automation):
 

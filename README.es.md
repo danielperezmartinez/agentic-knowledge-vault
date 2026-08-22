@@ -104,6 +104,10 @@ quedan en `<dir>/agentic-knowledge-vault/SKILL.md`.
 > la instalación de ámbito **proyecto** en cada repo — muy recomendada si tus
 > proyectos viven en una unidad distinta a la de tu perfil (habitual en Windows,
 > p. ej. `P:\`).
+>
+> Si defines `CLAUDE_CONFIG_DIR`, Claude Code lee las skills de usuario de
+> `$CLAUDE_CONFIG_DIR/skills` (no de `~/.claude/skills`). El instalador lo
+> respeta automáticamente.
 
 No interactivo (CI / automatización):
 
