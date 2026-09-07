@@ -187,11 +187,31 @@ ampliación, ofrece solo los sistemas que aún no estén montados.
   y secciones vacías listas para rellenar más adelante. El sistema queda
   funcional y navegable, pero sin contenido de dominio.
 
+### Pregunta 3b — Si "rellenar ahora": ¿cómo quieres rellenarlo? · _ambos modos_
+
+Si el usuario eligió "rellenar ahora" en la Pregunta 3, **antes de escribir
+ningún contenido** pregúntale explícitamente cómo quiere que se rellene. No
+asumas "automático" por defecto: es una elección tan explícita como la propia
+Pregunta 3.
+
+- **Automático**: tú infieres el contenido a partir del contexto del proyecto
+  (código, ficheros de configuración, historial, etc.) sin pedir cada dato uno
+  a uno.
+- **Guiado por el usuario**: el usuario te da las indicaciones/reglas; tú solo
+  las estructuras y las escribes, sin inventar ni inferir nada por tu cuenta.
+- **Mixto**: propones un borrador inferido del contexto y el usuario lo
+  corrige o completa antes de darlo por bueno.
+
+Aplica el modo elegido a todo el contenido que rellenes en esta sesión
+(reglas fundamentales, migración de conocimiento existente, y cualquier
+sistema nuevo que también deba rellenarse en modo ampliación).
+
 ### Pregunta 4 — Reglas fundamentales del proyecto (solo si "rellenar ahora") · _solo montaje inicial_
 
 Las "Reglas fundamentales" son específicas de cada proyecto y viven en
-`docs/README.md`. Derívalas preguntando; **monta solo las que apliquen**, no
-claves un conjunto fijo. Cubre al menos:
+`docs/README.md`. Complétalas según el modo elegido en la **Pregunta 3b**
+(automático, guiado o mixto); **monta solo las que apliquen**, no claves un
+conjunto fijo. Cubre al menos:
 
 - **Gestor de paquetes y política** (p. ej. pnpm exclusivo, prohibición de
   npm/npx, lockfile, cuarentena de versiones, scripts de instalación).
