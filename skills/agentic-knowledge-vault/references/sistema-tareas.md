@@ -1,8 +1,16 @@
+---
+sistema: tareas
+version: 1
+---
+
 # Sistema de Tareas (Paso 4)
 
 Móntalo solo si el usuario lo eligió en la Pregunta 2b. Crea la carpeta
 `{{BÓVEDA}}/Tareas/` con lo siguiente. Al terminar, añade su enlace en `Inicio.md`
 y sus reglas de estado en la sección "Sistemas disponibles" del `README.md`.
+Bajo el encabezado del sistema en esa sección, escribe además la línea
+`_Versión del sistema: 1._` (la `version` del frontmatter de este fichero): es la
+marca que el modo sincronización usa para saber qué versión hay instalada.
 
 ## 4a. Plantilla de nota de tarea
 
@@ -122,3 +130,17 @@ views:
         - Estado == "Archivada"
     order: [file.name, Estado, Resumen, Decisiones, formula.created_display, formula.updated_display]
 ```
+
+## Cambios y migraciones
+
+<!-- OBLIGATORIO al modificar este sistema: sube `version` en el frontmatter de
+     arriba y añade aquí una entrada `### vN → vN+1` (formato en
+     `references/sincronizacion.md`). Un cambio sin su entrada de migración está
+     incompleto (ver "Versionado y despliegue" en la memoria del repo). El modo
+     sincronización lee estas entradas para actualizar bóvedas ya montadas sin
+     pisar su contenido de dominio. -->
+
+### v1 — baseline
+
+Primera versión bajo el esquema de versionado por sistema; sin migraciones
+anteriores.

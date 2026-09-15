@@ -94,7 +94,10 @@ no puede leerse, el agente debe detenerse e informar al usuario.
 
 ## Sistemas disponibles
 
-<!-- Lista aquí únicamente los sistemas montados. Enlázalos desde [[Inicio]]. -->
+<!-- Lista aquí únicamente los sistemas montados. Enlázalos desde [[Inicio]].
+     Cada sistema lleva, bajo su encabezado, la línea `_Versión del sistema: N._`
+     con la versión que declara su fichero en references/. Esa marca es lo que el
+     modo sincronización compara para detectar sistemas desactualizados. -->
 
 ## Reglas fundamentales del proyecto
 

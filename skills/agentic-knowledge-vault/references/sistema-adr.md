@@ -1,10 +1,17 @@
+---
+sistema: adr
+version: 1
+---
+
 # Sistema ADR de arquitectura (Paso 5)
 
 Móntalo solo si el usuario lo pidió (recomendado en proyectos medianos/grandes).
 Sigue **el mismo principio que Tareas**: notas con frontmatter YAML + un `.base`.
 Carpeta `{{BÓVEDA}}/Decisiones/` (o `ADR/`). Al terminar, añade su enlace en
 `Inicio.md` y sus reglas de estado en la sección "Sistemas disponibles" del
-`README.md`.
+`README.md`. Bajo el encabezado del sistema en esa sección, escribe además la
+línea `_Versión del sistema: 1._` (la `version` del frontmatter de este fichero):
+es la marca que el modo sincronización usa para saber qué versión hay instalada.
 
 ## 5a. Plantilla de nota ADR
 
@@ -121,3 +128,17 @@ views:
         - Estado == "Rechazada"
     order: [Número, file.name, Estado, Resumen, formula.updated_display]
 ```
+
+## Cambios y migraciones
+
+<!-- OBLIGATORIO al modificar este sistema: sube `version` en el frontmatter de
+     arriba y añade aquí una entrada `### vN → vN+1` (formato en
+     `references/sincronizacion.md`). Un cambio sin su entrada de migración está
+     incompleto (ver "Versionado y despliegue" en la memoria del repo). El modo
+     sincronización lee estas entradas para actualizar bóvedas ya montadas sin
+     pisar su contenido de dominio. -->
+
+### v1 — baseline
+
+Primera versión bajo el esquema de versionado por sistema; sin migraciones
+anteriores.

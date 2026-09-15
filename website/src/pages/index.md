@@ -29,11 +29,15 @@ that work on a repository.
 Guiding principle: **one source of truth per unit of knowledge** — never parallel
 copies; link to the origin with wikilinks.
 
-## Two modes
+## Three modes
 
 - **Bootstrap** — no vault yet: full guided interview, mounts everything.
 - **Extend** — a vault exists: reuses its parameters and only asks which *new*
   system to add, without touching what is already there.
+- **Synchronize** — a vault exists and a mounted system changed in the blueprint:
+  each system is versioned and ships migration guides, so the change is propagated
+  to the vault — regenerating the canonical parts and migrating existing notes
+  with your approval, never overwriting your content.
 
 ## Install
 

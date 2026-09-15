@@ -32,7 +32,7 @@ Inside a target repository, the skill sets up:
 The guiding principle throughout: **one source of truth per unit of knowledge** —
 never parallel copies of a rule or decision; link to the origin with wikilinks.
 
-## Two modes
+## Three modes
 
 The skill detects the repository state and adapts:
 
@@ -40,10 +40,18 @@ The skill detects the repository state and adapts:
   scratch.
 - **Extend** — a vault already exists: reuses its parameters and only asks which
   *new* system to add, without touching what is already there.
+- **Synchronize** — a vault already exists and a system mounted in it has since
+  changed in the blueprint: propagates that change to the vault. Each system
+  declares a `version`; the vault records the version it has installed, and each
+  version bump ships a migration guide. Sync regenerates the canonical parts
+  (state rules, template, `.base`) and, when a change touches the schema of
+  existing notes, migrates them note-by-note with your approval — never
+  overwriting your content blindly.
 
-Re-invoking the skill to add a system is the intended workflow: the skill is the
-*blueprint* for every possible system, while the vault's README only documents
-the systems already installed.
+Re-invoking the skill is the intended workflow for both adding and updating
+systems: the skill is the *blueprint* for every possible system and holds the
+migration guides between versions, while the vault's README only documents (and
+version-stamps) the systems already installed.
 
 ## Cross-tool by design
 

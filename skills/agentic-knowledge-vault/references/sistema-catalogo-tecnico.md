@@ -1,3 +1,8 @@
+---
+sistema: catalogo-tecnico
+version: 1
+---
+
 # Catálogo técnico (Paso 7)
 
 Móntalo solo si el usuario lo eligió. Sigue **el mismo principio que Tareas/ADR**:
@@ -6,6 +11,9 @@ reutilizable) + un `.base` que las indexa, **más** una nota-índice fuera de la
 carpeta. Cada nota es un puntero corto: la **implementación** sigue siendo la
 fuente de verdad técnica del contrato. Al terminar, añade su enlace en `Inicio.md`
 y sus reglas de estado en la sección "Sistemas disponibles" del `README.md`.
+Bajo el encabezado del sistema en esa sección, escribe además la línea
+`_Versión del sistema: 1._` (la `version` del frontmatter de este fichero): es la
+marca que el modo sincronización usa para saber qué versión hay instalada.
 
 Estructura:
 
@@ -127,3 +135,17 @@ implementación, que continúa siendo la fuente de verdad técnica.
 (p. ej. un script que valida propiedades, fuentes y entrypoints), documéntala
 aquí en una sección "Verificación automática". -->
 ```
+
+## Cambios y migraciones
+
+<!-- OBLIGATORIO al modificar este sistema: sube `version` en el frontmatter de
+     arriba y añade aquí una entrada `### vN → vN+1` (formato en
+     `references/sincronizacion.md`). Un cambio sin su entrada de migración está
+     incompleto (ver "Versionado y despliegue" en la memoria del repo). El modo
+     sincronización lee estas entradas para actualizar bóvedas ya montadas sin
+     pisar su contenido de dominio. -->
+
+### v1 — baseline
+
+Primera versión bajo el esquema de versionado por sistema; sin migraciones
+anteriores.

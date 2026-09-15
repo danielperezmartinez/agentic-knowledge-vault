@@ -35,7 +35,7 @@ El principio rector: **una sola fuente de verdad por cada unidad de
 conocimiento** — nunca copias paralelas de una regla o decisión; se enlaza al
 origen con wikilinks.
 
-## Dos modos
+## Tres modos
 
 El skill detecta el estado del repositorio y se adapta:
 
@@ -43,10 +43,18 @@ El skill detecta el estado del repositorio y se adapta:
   desde cero.
 - **Ampliación** — ya existe una bóveda: reutiliza sus parámetros y solo pregunta
   qué sistema *nuevo* añadir, sin tocar lo ya existente.
+- **Sincronización** — ya existe una bóveda y un sistema montado en ella ha
+  cambiado después en el plano: propaga ese cambio a la bóveda. Cada sistema
+  declara una `version`; la bóveda registra la versión que tiene instalada, y cada
+  subida de versión trae una guía de migración. El sync regenera lo canónico
+  (reglas de estado, plantilla, `.base`) y, cuando un cambio afecta al esquema de
+  las notas existentes, las migra nota a nota con tu aprobación — sin reescribir
+  tu contenido a ciegas.
 
-Reinvocar el skill para añadir un sistema es el flujo previsto: el skill es el
-*plano* de todos los sistemas posibles, mientras que el README de la bóveda solo
-documenta los sistemas ya instalados.
+Reinvocar el skill es el flujo previsto tanto para añadir como para actualizar
+sistemas: el skill es el *plano* de todos los sistemas posibles y guarda las guías
+de migración entre versiones, mientras que el README de la bóveda solo documenta
+(y sella la versión de) los sistemas ya instalados.
 
 ## Multi-herramienta por diseño
 
