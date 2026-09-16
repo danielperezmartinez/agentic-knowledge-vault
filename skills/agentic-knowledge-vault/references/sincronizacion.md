@@ -59,17 +59,21 @@ notas**, el sync **no lo cambia**. Ante ambigüedad, se pregunta; no se infiere.
 2. Para cada sistema montado, abre **solo** su `references/sistema-*.md` y lee la
    `version` del frontmatter (la del plano).
 3. Construye la tabla de deriva:
-   - **instalada == plano** → al día, no se toca.
-   - **instalada < plano** → hay salto; candidato a sincronizar.
-   - **sin línea de versión** → bóveda montada antes del versionado: trátala como
-     `instalada = 1` (baseline). Si el plano también está en 1, solo hay que
-     **sellar** la línea `_Versión del sistema: 1._` (no se migra nada).
+   - **al día** → tiene línea e `instalada == plano`. No se toca.
+   - **desactualizado** → tiene línea e `instalada < plano`. Hay salto: migra.
+   - **sin sellar** → **no tiene** línea de versión (bóveda montada antes del
+     versionado). Trátalo como `instalada = 1` (baseline). Aunque su contenido ya
+     esté al día, **hay que estampar su línea de baseline** `_Versión del sistema:
+     1._`: eso es un cambio real, **no** "nada que hacer". Y si además `1 < plano`,
+     también migra (v1 → plano). Antes de sellar a ciegas, lee la **Limitación
+     conocida** del final.
 
 ### Paso S2 — Presentar el plan (dry-run, obligatorio)
 
 Muestra al usuario, antes de tocar nada:
 
-- Qué sistemas están al día, cuáles se van a sincronizar y de qué versión a cuál.
+- Qué sistemas están al día, cuáles se van a **sellar** (baseline, sin migración) y
+  cuáles se van a **migrar** (y de qué versión a cuál).
 - Por cada salto, un resumen de lo **Canónico** que se regenerará y de las notas
   afectadas por cambios de **Esquema**.
 
@@ -78,7 +82,12 @@ respétalo.
 
 ### Paso S3 — Aplicar, un sistema a la vez, en orden de versión
 
-Por cada sistema a sincronizar, y por cada salto `vN → vN+1` en orden ascendente:
+**Caso "sin sellar" sin salto** (instalada = 1 = plano): no hay nada que regenerar
+ni migrar; la única acción es **sellar** su línea de baseline (Paso S4). No toques
+reglas, plantilla, `.base` ni notas.
+
+Para un sistema **desactualizado** (o "sin sellar" con `1 < plano`), por cada salto
+`vN → vN+1` en orden ascendente:
 
 1. **Canónico:** aplica los cambios del bloque a la bóveda (reglas de estado en el
    README, plantilla de nota, vistas del `.base`). Estos son derivados del plano y
@@ -96,12 +105,14 @@ Por cada sistema a sincronizar, y por cada salto `vN → vN+1` en orden ascenden
 ### Paso S4 — Sellar la versión
 
 Actualiza la línea `_Versión del sistema: N._` del README al número del plano ya
-alcanzado. Si la bóveda no tenía línea, créala.
+alcanzado. Si la bóveda no tenía línea (sistema "sin sellar"), **créala** — este
+sellado ocurre siempre, tanto tras una migración como en el caso baseline sin salto.
 
 ### Paso S5 — Verificación
 
-- [ ] Cada sistema sincronizado tiene su `_Versión del sistema: N._` igual a la
-      `version` del plano.
+- [ ] Cada sistema procesado —sellado o migrado— tiene su `_Versión del sistema:
+      N._` igual a la `version` del plano; no queda ningún sistema montado sin
+      línea de versión.
 - [ ] Las reglas/plantilla/`.base` regenerados coinciden con el plano actual.
 - [ ] Las notas afectadas por cambios de esquema se migraron con aprobación; el
       resto de notas y todo lo marcado como **NO tocar** quedó intacto.
@@ -124,3 +135,33 @@ quedó igual.
 - Si el plano de un sistema no tiene entrada de migración para un salto que
   detectas, **detente y avisa**: falta la guía (el autor incumplió la regla de
   versionado); no improvises la migración.
+
+---
+
+## Limitación conocida — deriva anterior al versionado
+
+El versionado por sistema arrancó con **todos los sistemas en v1** (baseline). El
+sync detecta saltos comparando números de versión, así que **no puede detectar por
+sí solo la deriva de cambios hechos antes de que existiera el versionado**: una
+bóveda "sin sellar" se trata como v1 tenga el contenido que tenga.
+
+Consecuencia: si en el futuro un sistema sube a v2 con su guía, el sync **no puede
+distinguir por el número** una bóveda antigua (que de verdad tiene la forma v1) de
+una montada después del cambio pero aún sin sellar (que ya tiene la forma v2). Las
+dos se ven igual: sin línea de versión. Un salto v1 → v2 basado solo en el número
+les caería a ambas, y a la segunda **por error**.
+
+Por eso, para deriva **anterior** al versionado, no se emiten migraciones de
+versión retroactivas. Si algún día hiciera falta cubrir uno de esos saltos
+históricos, su guía debe incluir una **comprobación por contenido** (no por número)
+que decida a qué bóvedas aplica realmente.
+
+**Caso concreto documentado (revisión manual, no automatizada):** el commit
+`7624b35` (2026-08-22) reescribió el **Catálogo técnico** de "nota-índice con tabla
+Markdown, sin `.base`" a "carpeta de notas + `.base` + nota-índice", y cambió
+`Inicio.md` de vistas incrustadas (`![[...#Todo]]`) a solo enlaces. Una bóveda
+montada **antes** de esa fecha con el Catálogo en forma de tabla (o con embeds en
+`Inicio`) está desactualizada en esos dos puntos, pero el sync **no lo marcará**
+(los ve como v1 = plano). Requiere revisión manual: si el Catálogo es una tabla
+Markdown, rehacerlo con el patrón `.base` de `references/sistema-catalogo-tecnico.md`;
+si `Inicio` tiene embeds, dejarlos en solo enlaces.

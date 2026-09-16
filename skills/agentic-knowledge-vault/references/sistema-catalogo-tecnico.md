@@ -149,3 +149,9 @@ aquí en una sección "Verificación automática". -->
 
 Primera versión bajo el esquema de versionado por sistema; sin migraciones
 anteriores.
+
+> Nota histórica (anterior al versionado): el commit `7624b35` (2026-08-22)
+> reescribió este sistema de "nota-índice con tabla Markdown" a "carpeta + `.base`
+> + nota-índice". Esa deriva **no** se cubre con una migración de versión (el sync
+> no puede distinguir por número las bóvedas afectadas); es **revisión manual**.
+> Ver "Limitación conocida" en `references/sincronizacion.md`.

@@ -93,17 +93,24 @@ Según el resultado:
 Antes de preguntar, **compara versiones** para saber qué ofrecer:
 
 1. En la sección "Sistemas disponibles" del README, lee cada sistema montado y su
-   línea `_Versión del sistema: N._`. Si un sistema montado no la tiene (bóveda
-   anterior al versionado), trátalo como `N = 1`.
+   línea `_Versión del sistema: N._`.
 2. Para cada sistema montado, abre **solo** su `references/sistema-*.md` y lee la
-   `version` de su frontmatter (la del plano). Anota los que tengan
-   `instalada < plano`: son los **desactualizados**.
+   `version` de su frontmatter (la del plano). Clasifica cada sistema:
+   - **desactualizado**: tiene línea de versión e `instalada < plano`.
+   - **sin sellar**: **no tiene** línea de versión (bóveda anterior al versionado).
+     Cuenta como `instalada = 1`; necesita que se **estampe su línea de baseline**
+     aunque su contenido ya esté al día — y si además `1 < plano`, también migra.
+   - **al día**: tiene línea e `instalada == plano`. No se toca.
+
+   Ojo: "sin sellar" **no** es "al día". Sellar la línea de baseline es un cambio
+   real que hay que hacer; no lo trates como "nada que hacer".
 
 Con eso, pregunta el alcance en una sola pregunta (ofrece solo lo que aplique):
 
 - **Añadir sistemas nuevos** (ampliación) — si quedan sistemas sin montar.
-- **Sincronizar sistemas desactualizados** — solo si el paso 2 encontró alguno;
-  nómbralos con su salto (p. ej. "Tareas v1 → v2").
+- **Sincronizar** — ofrécelo si hay algún sistema **desactualizado o sin sellar**.
+  Nombra los desactualizados con su salto (p. ej. "Tareas v1 → v2") y los sin
+  sellar como "sellar baseline v1".
 - **Ambos**.
 
 Enruta según la respuesta:
@@ -116,12 +123,13 @@ Enruta según la respuesta:
   (con su línea `_Versión del sistema: N._`) y los enlaces de `Inicio`. **No
   toques los sistemas existentes.**
 - **Sincronización** → abre `references/sincronizacion.md` y sigue su
-  procedimiento. NO abras `base-compartida.md` ni los ficheros de los sistemas que
-  estén al día.
-- **Ambos** → primero sincroniza los desactualizados, luego amplía con los nuevos.
+  procedimiento (incluye **sellar** los sistemas sin sellar, no solo migrar los
+  desactualizados). NO abras `base-compartida.md` ni los ficheros de los sistemas
+  que estén al día.
+- **Ambos** → primero sincroniza (sella y migra), luego amplía con los nuevos.
 
-Si no hay sistemas nuevos por montar ni desactualizados, la bóveda está completa y
-al día: infórmalo y termina sin cambios.
+Si no hay sistemas nuevos por montar, ni desactualizados, **ni sin sellar**, la
+bóveda está completa y al día: infórmalo y termina sin cambios.
 
 > Por qué reinvocar el skill para añadir un sistema es lo correcto: el skill es el
 > *plano* de todos los sistemas posibles; el README de la bóveda solo documenta
@@ -296,8 +304,9 @@ Orden de aplicación:
 2. **Ampliación**: NO leas `base-compartida.md`. Lee solo el/los fichero(s) del/de
    los sistema(s) nuevo(s), móntalos y actualiza `README.md` e `Inicio.md`.
 3. **Sincronización**: NO leas `base-compartida.md`. Abre `references/sincronizacion.md`
-   y, guiado por él, solo el/los `references/sistema-*.md` de los sistemas
-   desactualizados (para leer su `## Cambios y migraciones`).
+   y, guiado por él, los `references/sistema-*.md` de los sistemas desactualizados
+   o sin sellar (para leer su `version` y, si migran, su `## Cambios y migraciones`).
+   Sella la línea de versión también de los que solo estén "sin sellar".
 
 ---
 
