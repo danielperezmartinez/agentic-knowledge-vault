@@ -170,7 +170,13 @@ function Get-SourceDir {
   if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot (Join-Path $reldir 'SKILL.md')))) { return (Resolve-Path (Join-Path $PSScriptRoot $reldir)).Path }
   $script:TmpDir = Join-Path ([System.IO.Path]::GetTempPath()) ("akv-" + [System.Guid]::NewGuid().ToString('N'))
   Write-Host "Descargando el skill…"
-  git clone --depth 1 $RepoUrl $script:TmpDir *> $null
+  if (-not (Get-Command git -ErrorAction SilentlyContinue)) { throw "Se necesita git para descargar el skill (https://git-scm.com/download/win)." }
+  # git escribe su progreso en stderr; en Windows PowerShell 5.1, con
+  # ErrorActionPreference='Stop', redirigir stderr lo convierte en error terminante.
+  # Se relaja solo para esta llamada y el éxito se decide por el código de salida.
+  $prevEap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+  try { $out = git clone --quiet --depth 1 $RepoUrl $script:TmpDir 2>&1 } finally { $ErrorActionPreference = $prevEap }
+  if ($LASTEXITCODE -ne 0) { throw "git clone falló (código $LASTEXITCODE): $(($out | ForEach-Object { "$_" }) -join ' ')" }
   $d = Join-Path $script:TmpDir $reldir
   if (-not (Test-Path (Join-Path $d 'SKILL.md'))) { throw "No se encontró SKILL.md en el origen." }
   return $d
