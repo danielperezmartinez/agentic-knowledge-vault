@@ -29,6 +29,14 @@ Dentro del repositorio destino, el skill monta:
   - **ADR** — registros de decisiones de arquitectura.
   - **Decisiones visuales y de estilos**.
   - **Catálogo técnico** — índice de la superficie pública reutilizable.
+  - **Seguridad, coste y cumplimiento** — reglas de seguridad a nivel de fila y
+    permisos del backend, límites contra el abuso y las facturas descontroladas,
+    secretos, requisitos legales y de privacidad de la UE y España, y
+    accesibilidad WCAG AA. Además monta comprobaciones ejecutables (tests de RLS
+    que actúan como `anon` y como un segundo usuario, AXE en el CI) que una tarea
+    debe pasar antes de darse por hecha, y una checklist de lanzamiento para la
+    configuración que vive fuera del código (topes de gasto, Auth, firewall,
+    entornos de los secretos, plan).
   - …y más; el conjunto es extensible.
 
 El principio rector: **una sola fuente de verdad por cada unidad de

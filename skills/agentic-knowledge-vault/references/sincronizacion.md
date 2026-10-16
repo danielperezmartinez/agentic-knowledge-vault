@@ -67,6 +67,13 @@ notas**, el sync **no lo cambia**. Ante ambigüedad, se pregunta; no se infiere.
      1._`: eso es un cambio real, **no** "nada que hacer". Y si además `1 < plano`,
      también migra (v1 → plano). Antes de sellar a ciegas, lee la **Limitación
      conocida** del final.
+4. Los sistemas del plano que la bóveda **no tiene montados** quedan fuera del
+   sync: no se sellan ni se migran. Si alguno es nuevo en el plano (p. ej.
+   Seguridad, coste y cumplimiento, añadido en el paquete 1.4.0), menciónalo en
+   el plan del Paso S2 como "disponible por ampliación". Se monta con el modo
+   ampliación y, si su fichero tiene guía de adopción para bóvedas existentes
+   (como la sección 9e de `sistema-seguridad-coste-cumplimiento.md`), se sigue
+   esa guía.
 
 ### Paso S2 — Presentar el plan (dry-run, obligatorio)
 
@@ -76,6 +83,8 @@ Muestra al usuario, antes de tocar nada:
   cuáles se van a **migrar** (y de qué versión a cuál).
 - Por cada salto, un resumen de lo **Canónico** que se regenerará y de las notas
   afectadas por cambios de **Esquema**.
+- Qué sistemas nuevos del plano no están montados y podrían añadirse por
+  ampliación (solo informativo; el sync no los monta).
 
 No apliques nada sin su confirmación. Si eligió sincronizar solo un subconjunto,
 respétalo.

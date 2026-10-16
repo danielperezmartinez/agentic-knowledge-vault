@@ -7,7 +7,8 @@ description: >-
   agentes. Incluye los punteros de arranque `AGENTS.md`/`CLAUDE.md`, el protocolo
   obligatorio para agentes, y sistemas de conocimiento formados por notas con
   frontmatter YAML e índices `.base` de Obsidian Bases (Tareas, ADR de
-  arquitectura, decisiones visuales, catálogo técnico, y otros extensibles).
+  arquitectura, decisiones visuales, catálogo técnico, seguridad, coste y
+  cumplimiento con comprobaciones ejecutables, y otros extensibles).
   Úsalo para INSTAURAR este sistema en un repositorio nuevo, para AMPLIAR una
   bóveda existente con sistemas nuevos, o para SINCRONIZAR en una bóveda ya
   montada los cambios hechos en las instrucciones de un sistema (versionado por
@@ -212,6 +213,12 @@ ampliación, ofrece solo los sistemas que aún no estén montados.
   componentes. Puede compartir patrón con ADR o ser una lista más ligera.
 - **Catálogo técnico** — superficie pública reutilizable (UI, servicios,
   contratos). Carpeta de notas estructuradas por pieza + `.base` + nota-índice.
+- **Seguridad, coste y cumplimiento** — reglas de RLS y backend, límites contra
+  abuso y facturas, secretos, legal y privacidad (UE) y accesibilidad WCAG AA,
+  con comprobaciones ejecutables (tests RLS, AXE en CI) que deciden cuándo una
+  tarea puede pasar a "Hecha", y una checklist de lanzamiento. *Recomendado en
+  cualquier app con usuarios, backend o interfaz pública.* Tiene su propia
+  entrevista (ver su fichero de `references/`).
 - **Otros** — pregunta libre por sistemas adicionales que el usuario quiera.
 
 > **Regla defensiva (obligatoria).** Si en cualquier momento la respuesta de
@@ -292,13 +299,16 @@ de esta tabla que correspondan, en este orden. No abras los que no vas a usar.
 | Sistema ADR (Paso 5) | `references/sistema-adr.md` | Solo si se eligió ADR. |
 | Decisiones visuales (Paso 6) | `references/sistema-decisiones-visuales.md` | Solo si se eligió. |
 | Catálogo técnico (Paso 7) | `references/sistema-catalogo-tecnico.md` | Solo si se eligió. |
+| Seguridad, coste y cumplimiento (Paso 9) | `references/sistema-seguridad-coste-cumplimiento.md` | Solo si se eligió. Incluye su entrevista propia y, para bóvedas existentes, su guía de adopción (9e). |
 | Configuración de Obsidian (Paso 8) | `references/obsidian.md` | Opcional; si el usuario usa Obsidian. |
 | Sincronizar sistemas montados (Modo 3) | `references/sincronizacion.md` | Solo en modo sincronización (ver Pregunta 0b). |
 
 Orden de aplicación:
 
 1. **Montaje inicial**: primero `base-compartida.md`; después, un fichero por cada
-   sistema elegido; al final `obsidian.md` si aplica. Cada fichero de sistema te
+   sistema elegido (Seguridad, coste y cumplimiento va después de Tareas, porque
+   su compuerta de "Hecha" se apoya en él si está montado); al final
+   `obsidian.md` si aplica. Cada fichero de sistema te
    dice qué añadir a "Sistemas disponibles" del `README.md` (incluida su línea
    `_Versión del sistema: N._`) y a `Inicio.md`.
 2. **Ampliación**: NO leas `base-compartida.md`. Lee solo el/los fichero(s) del/de

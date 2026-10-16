@@ -27,6 +27,13 @@ Inside a target repository, the skill sets up:
   - **ADR** — architecture decision records.
   - **Visual/style decisions**.
   - **Technical catalog** — index of the reusable public surface.
+  - **Security, cost and compliance** — rules for row-level security and
+    backend permissions, limits against abuse and runaway bills, secrets,
+    EU/Spain legal and privacy requirements and WCAG AA accessibility. It also
+    sets up executable checks (RLS tests acting as `anon` and as a second user,
+    AXE in CI) that a task must pass before it can be marked done, plus a
+    launch checklist for settings that live outside the code (spend caps, Auth,
+    firewall, secret environments, plan).
   - …and more; the set is extensible.
 
 The guiding principle throughout: **one source of truth per unit of knowledge** —
