@@ -31,12 +31,15 @@ Dentro del repositorio destino, el skill monta:
   - **Catálogo técnico** — índice de la superficie pública reutilizable.
   - **Seguridad, coste y cumplimiento** — reglas de seguridad a nivel de fila y
     permisos del backend, límites contra el abuso y las facturas descontroladas,
-    secretos, requisitos legales y de privacidad de la UE y España, y
-    accesibilidad WCAG AA. Además monta comprobaciones ejecutables (tests de RLS
-    que actúan como `anon` y como un segundo usuario, AXE en el CI) que una tarea
-    debe pasar antes de darse por hecha, y una checklist de lanzamiento para la
+    secretos, requisitos legales y de privacidad de la UE y España,
+    accesibilidad WCAG AA, y lo que nunca debe llegar a un repositorio público
+    (secretos, datos del entorno personal y vulnerabilidades sin corregir, que van
+    a avisos privados de GitHub). Además monta comprobaciones ejecutables (tests
+    de RLS que actúan como `anon` y como un segundo usuario, AXE en el CI,
+    gitleaks en hooks pre-commit/pre-push y en el CI) que una tarea debe pasar
+    antes de darse por hecha, y una checklist de lanzamiento para la
     configuración que vive fuera del código (topes de gasto, Auth, firewall,
-    entornos de los secretos, plan).
+    entornos de los secretos, plan, secret scanning y push protection de GitHub).
   - …y más; el conjunto es extensible.
 
 El principio rector: **una sola fuente de verdad por cada unidad de

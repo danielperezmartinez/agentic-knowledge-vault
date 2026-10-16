@@ -214,8 +214,9 @@ ampliación, ofrece solo los sistemas que aún no estén montados.
 - **Catálogo técnico** — superficie pública reutilizable (UI, servicios,
   contratos). Carpeta de notas estructuradas por pieza + `.base` + nota-índice.
 - **Seguridad, coste y cumplimiento** — reglas de RLS y backend, límites contra
-  abuso y facturas, secretos, legal y privacidad (UE) y accesibilidad WCAG AA,
-  con comprobaciones ejecutables (tests RLS, AXE en CI) que deciden cuándo una
+  abuso y facturas, secretos, legal y privacidad (UE), accesibilidad WCAG AA y
+  qué no se sube nunca a un repo público, con comprobaciones ejecutables (tests
+  RLS, AXE en CI, gitleaks antes de cada commit y push) que deciden cuándo una
   tarea puede pasar a "Hecha", y una checklist de lanzamiento. *Recomendado en
   cualquier app con usuarios, backend o interfaz pública.* Tiene su propia
   entrevista (ver su fichero de `references/`).

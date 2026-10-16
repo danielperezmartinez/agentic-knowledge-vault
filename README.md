@@ -29,11 +29,15 @@ Inside a target repository, the skill sets up:
   - **Technical catalog** — index of the reusable public surface.
   - **Security, cost and compliance** — rules for row-level security and
     backend permissions, limits against abuse and runaway bills, secrets,
-    EU/Spain legal and privacy requirements and WCAG AA accessibility. It also
+    EU/Spain legal and privacy requirements, WCAG AA accessibility, and what must
+    never reach a public repository (secrets, personal environment details,
+    unfixed vulnerabilities, which go to private GitHub advisories). It also
     sets up executable checks (RLS tests acting as `anon` and as a second user,
-    AXE in CI) that a task must pass before it can be marked done, plus a
+    AXE in CI, gitleaks in pre-commit/pre-push hooks and in CI) that a task must
+    pass before it can be marked done, plus a
     launch checklist for settings that live outside the code (spend caps, Auth,
-    firewall, secret environments, plan).
+    firewall, secret environments, plan, GitHub secret scanning and push
+    protection).
   - …and more; the set is extensible.
 
 The guiding principle throughout: **one source of truth per unit of knowledge** —

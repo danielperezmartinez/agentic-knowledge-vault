@@ -27,9 +27,10 @@ that work on a repository.
   notes indexed by an Obsidian **Bases** (`.base`) view. The set is extensible.
 - **Security, cost and compliance** — an optional system that adds backend
   permission rules (RLS), limits against abuse and runaway bills, secrets
-  handling, EU legal/privacy requirements and WCAG AA, backed by executable
-  checks (RLS tests, AXE in CI) that gate when a task is done, plus a launch
-  checklist for what lives outside the code.
+  handling, EU legal/privacy requirements, WCAG AA and leak prevention for
+  public repositories, backed by executable checks (RLS tests, AXE in CI,
+  gitleaks before every commit and push) that gate when a task is done, plus a
+  launch checklist for what lives outside the code.
 
 Guiding principle: **one source of truth per unit of knowledge** — never parallel
 copies; link to the origin with wikilinks.

@@ -28,10 +28,11 @@ Codex, Cursor, Gemini, Copilot…) que trabajan en un repositorio.
   **Bases** (`.base`). El conjunto es extensible.
 - **Seguridad, coste y cumplimiento** — un sistema opcional que añade reglas de
   permisos del backend (RLS), límites contra el abuso y las facturas
-  descontroladas, manejo de secretos, requisitos legales y de privacidad de la UE
-  y WCAG AA, respaldadas por comprobaciones ejecutables (tests de RLS, AXE en el
-  CI) que deciden cuándo una tarea está hecha, y una checklist de lanzamiento
-  para lo que vive fuera del código.
+  descontroladas, manejo de secretos, requisitos legales y de privacidad de la UE,
+  WCAG AA y prevención de fugas en repositorios públicos, respaldadas por
+  comprobaciones ejecutables (tests de RLS, AXE en el CI, gitleaks antes de cada
+  commit y push) que deciden cuándo una tarea está hecha, y una checklist de
+  lanzamiento para lo que vive fuera del código.
 
 Principio rector: **una sola fuente de verdad por cada unidad de conocimiento** —
 nunca copias paralelas; se enlaza al origen con wikilinks.
