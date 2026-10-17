@@ -41,7 +41,8 @@ nunca copias paralelas; se enlaza al origen con wikilinks.
 
 - **Montaje inicial** — no hay bóveda: entrevista guiada completa, monta todo.
 - **Ampliación** — ya existe una bóveda: reutiliza sus parámetros y solo pregunta
-  qué sistema *nuevo* añadir, sin tocar lo ya existente.
+  qué sistema *nuevo* añadir, sin tocar lo ya existente salvo las integraciones
+  entre sistemas que declare.
 
 ## Instalación
 

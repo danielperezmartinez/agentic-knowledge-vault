@@ -39,7 +39,8 @@ copies; link to the origin with wikilinks.
 
 - **Bootstrap** — no vault yet: full guided interview, mounts everything.
 - **Extend** — a vault exists: reuses its parameters and only asks which *new*
-  system to add, without touching what is already there.
+  system to add, without touching what is already there except the integrations
+  between systems that it declares.
 - **Synchronize** — a vault exists and a mounted system changed in the blueprint:
   each system is versioned and ships migration guides, so the change is propagated
   to the vault — regenerating the canonical parts and migrating existing notes

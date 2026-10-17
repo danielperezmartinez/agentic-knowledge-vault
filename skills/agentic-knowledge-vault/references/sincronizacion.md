@@ -48,6 +48,13 @@ terminales, etc.).
 Regla de oro: si una entrada no lista algo bajo **Canónico** ni bajo **Esquema de
 notas**, el sync **no lo cambia**. Ante ambigüedad, se pregunta; no se infiere.
 
+**Bloques condicionados a otros sistemas.** Si el sistema declara
+`se_integra_con` (ver "Relaciones entre sistemas" en `SKILL.md`), una entrada
+puede tener líneas que solo aplican si el otro sistema está montado en la bóveda
+("si Publicación está montado: …"). El sync comprueba qué hay montado y aplica
+solo las que correspondan. Si el otro sistema se monta después, su ampliación
+aplicará la sección "Integración con…" vigente; no hace falta volver a migrar.
+
 ---
 
 ## Procedimiento

@@ -50,7 +50,8 @@ The skill detects the repository state and adapts:
 - **Bootstrap** — no vault yet: full guided interview, mounts everything from
   scratch.
 - **Extend** — a vault already exists: reuses its parameters and only asks which
-  *new* system to add, without touching what is already there.
+  *new* system to add, without touching what is already there except the
+  integrations it declares (see below).
 - **Synchronize** — a vault already exists and a system mounted in it has since
   changed in the blueprint: propagates that change to the vault. Each system
   declares a `version`; the vault records the version it has installed, and each
@@ -63,6 +64,14 @@ Re-invoking the skill is the intended workflow for both adding and updating
 systems: the skill is the *blueprint* for every possible system and holds the
 migration guides between versions, while the vault's README only documents (and
 version-stamps) the systems already installed.
+
+Systems can relate to each other. Each one declares which systems it `requires`
+(none do today) and which it integrates with. A system always works on its own,
+and gains extra pieces when the related system is also mounted: for example, a
+gate that relies on Tasks. If the related system is mounted later, extending the
+vault applies the pending integration. The interview groups the systems into
+categories, one multiple-choice question per category, so the choice still fits
+in a single step as the list grows.
 
 ## Cross-tool by design
 

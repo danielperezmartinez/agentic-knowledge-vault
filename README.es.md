@@ -53,7 +53,8 @@ El skill detecta el estado del repositorio y se adapta:
 - **Montaje inicial** — no hay bóveda: entrevista guiada completa, monta todo
   desde cero.
 - **Ampliación** — ya existe una bóveda: reutiliza sus parámetros y solo pregunta
-  qué sistema *nuevo* añadir, sin tocar lo ya existente.
+  qué sistema *nuevo* añadir, sin tocar lo ya existente salvo las integraciones
+  que declare (ver más abajo).
 - **Sincronización** — ya existe una bóveda y un sistema montado en ella ha
   cambiado después en el plano: propaga ese cambio a la bóveda. Cada sistema
   declara una `version`; la bóveda registra la versión que tiene instalada, y cada
@@ -66,6 +67,14 @@ Reinvocar el skill es el flujo previsto tanto para añadir como para actualizar
 sistemas: el skill es el *plano* de todos los sistemas posibles y guarda las guías
 de migración entre versiones, mientras que el README de la bóveda solo documenta
 (y sella la versión de) los sistemas ya instalados.
+
+Los sistemas pueden relacionarse entre sí. Cada uno declara qué sistemas
+`requiere` (hoy ninguno) y con cuáles se integra. Un sistema siempre funciona
+solo y gana piezas cuando el sistema relacionado también está montado: por
+ejemplo, una compuerta que se apoya en Tareas. Si el sistema relacionado se monta
+después, la ampliación aplica la integración pendiente. La entrevista agrupa los
+sistemas por categorías, con una pregunta de selección múltiple por categoría,
+para que la elección siga siendo un solo paso aunque la lista crezca.
 
 ## Multi-herramienta por diseño
 

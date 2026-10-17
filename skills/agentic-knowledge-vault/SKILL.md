@@ -121,8 +121,10 @@ Enruta según la respuesta:
   (2) Si el sistema nuevo necesita contenido, aplica la **Pregunta 3** solo para
   él. (3) Lee y aplica **solo** el/los `references/sistema-*.md` nuevo(s); NO abras
   `references/base-compartida.md`. (4) Actualiza "Sistemas disponibles" del README
-  (con su línea `_Versión del sistema: N._`) y los enlaces de `Inicio`. **No
-  toques los sistemas existentes.**
+  (con su línea `_Versión del sistema: N._`) y los enlaces de `Inicio`. (5) Aplica
+  las integraciones entre el sistema nuevo y los ya montados (ver "Relaciones
+  entre sistemas"). **No toques los sistemas existentes salvo lo que diga una
+  sección "Integración con…".**
 - **Sincronización** → abre `references/sincronizacion.md` y sigue su
   procedimiento (incluye **sellar** los sistemas sin sellar, no solo migrar los
   desactualizados). NO abras `base-compartida.md` ni los ficheros de los sistemas
@@ -199,10 +201,37 @@ añadirse reinvocando el skill en modo ampliación. **No hagas la Pregunta 2b ni
 ninguna pregunta de sistemas.** Da el montaje por terminado; no reabras la
 decisión.
 
-#### Pregunta 2b — Qué sistemas (selección múltiple) · _montaje inicial y ampliación_
+#### Pregunta 2b — Qué sistemas (selección múltiple, agrupada por categorías) · _montaje inicial y ampliación_
 
 Solo si en 2a eligió montar sistemas (o si estás en modo ampliación). En modo
 ampliación, ofrece solo los sistemas que aún no estén montados.
+
+**Cómo preguntarlo.** Hay más sistemas de los que caben en una sola pregunta de la
+herramienta de preguntas (normalmente, máximo 4 opciones por pregunta y 4
+preguntas por llamada). Por eso los sistemas se agrupan por **categorías**:
+
+| Categoría | Sistemas |
+| --- | --- |
+| **Memoria y decisiones** | Tareas · ADR · Decisiones visuales y de estilos · Catálogo técnico |
+| **Calidad y publicación** | Seguridad, coste y cumplimiento |
+
+- Haz **una pregunta de selección múltiple por categoría, todas en la misma
+  llamada**, para que el usuario responda en un solo paso. Omite las categorías
+  que se queden sin sistemas por ofrecer (p. ej. en ampliación).
+- Cada pregunta lleva como máximo 4 opciones. Si una categoría crece por encima
+  de eso, pártela en dos preguntas ("Memoria y decisiones (1/2)", "(2/2)"). Si un
+  día hay más categorías que preguntas por llamada, haz una segunda llamada con
+  las restantes.
+- Usa la descripción de cada opción para lo que el usuario necesita saber al
+  elegir, incluidas sus relaciones con otros sistemas ("se integra con
+  Seguridad"; ver "Relaciones entre sistemas" más abajo).
+- La opción de texto libre que la herramienta añade sola cubre **Otros**. Si tu
+  herramienta no tiene preguntas estructuradas, presenta en el chat una lista
+  numerada agrupada por categorías y pide los números.
+- Al añadir un sistema nuevo a la skill, asígnalo a una categoría de esta tabla
+  (o crea una nueva si no encaja en ninguna).
+
+Descripción de cada sistema (para las opciones):
 
 - **Tareas** — gestión de trabajos como notas con estado. *Recomendado en la
   mayoría de proyectos, pero opcional.*
@@ -223,7 +252,8 @@ ampliación, ofrece solo los sistemas que aún no estén montados.
 - **Otros** — pregunta libre por sistemas adicionales que el usuario quiera.
 
 > **Regla defensiva (obligatoria).** Si en cualquier momento la respuesta de
-> sistemas vuelve **vacía** (el usuario no seleccionó ninguno), **no reintentes ni
+> sistemas vuelve **vacía** (el usuario no seleccionó ninguno **en ninguna de las
+> categorías**), **no reintentes ni
 > vuelvas a preguntar en bucle**: interprétala como "solo la base compartida",
 > confírmalo en una sola frase ("Monto solo la base compartida, sin sistemas,
 > ¿de acuerdo?") y procede con el camino de "solo la base" descrito en 2a. En modo
@@ -313,11 +343,69 @@ Orden de aplicación:
    dice qué añadir a "Sistemas disponibles" del `README.md` (incluida su línea
    `_Versión del sistema: N._`) y a `Inicio.md`.
 2. **Ampliación**: NO leas `base-compartida.md`. Lee solo el/los fichero(s) del/de
-   los sistema(s) nuevo(s), móntalos y actualiza `README.md` e `Inicio.md`.
+   los sistema(s) nuevo(s), móntalos y actualiza `README.md` e `Inicio.md`. De los
+   sistemas ya montados, lee solo su frontmatter y, si se integran con el nuevo,
+   su sección "Integración con…" (ver "Relaciones entre sistemas").
 3. **Sincronización**: NO leas `base-compartida.md`. Abre `references/sincronizacion.md`
    y, guiado por él, los `references/sistema-*.md` de los sistemas desactualizados
    o sin sellar (para leer su `version` y, si migran, su `## Cambios y migraciones`).
    Sella la línea de versión también de los que solo estén "sin sellar".
+
+---
+
+## Relaciones entre sistemas
+
+Algunos sistemas usan piezas de otros (p. ej. una compuerta que se apoya en
+Tareas, o checks obligatorios que vienen de Seguridad). El principio: **cada
+sistema funciona solo y se enriquece si el otro está montado.** Nunca montes un
+sistema a medias porque falte otro, ni montes otro sin preguntar.
+
+### Cómo se declaran
+
+En el frontmatter de cada `references/sistema-*.md`, junto a `sistema` y
+`version`:
+
+```yaml
+requiere: []          # sistemas sin los que este no puede funcionar (ids de `sistema:`)
+se_integra_con: []    # sistemas que, si están montados, cambian lo que este monta
+```
+
+Si un campo falta, vale `[]`. Por cada entrada de `se_integra_con`, el fichero
+tiene una sección `## Integración con <Sistema>` con:
+
+- **Qué añade** cuando ambos están montados. Solo escribe en lo que es de este
+  sistema: su sección de "Sistemas disponibles", su carpeta y los ficheros del
+  repo que la propia sección nombre. Nunca reescribe la sección ni las notas del
+  otro sistema.
+- **Qué hace si el otro no está montado** (la versión independiente).
+- **Señal de que ya está aplicada**, para detectarlo por contenido sin depender de
+  ninguna marca adicional en la bóveda.
+
+### Qué hace el agente
+
+- **En la entrevista** (Pregunta 2b y al confirmar la selección):
+  - Si un sistema elegido tiene en `requiere` otro no elegido ni montado,
+    ofrece montarlo también. Si el usuario no quiere, no montes el que lo
+    requiere.
+  - Si un sistema elegido tiene en `se_integra_con` otro no elegido ni montado,
+    menciónalo en una frase como recomendación ("Publicación usa los checks de
+    Seguridad si la montas") y respeta la respuesta.
+- **Al montar** (inicial o ampliación), después de montar los sistemas elegidos:
+  1. Para cada sistema recién montado, aplica sus secciones "Integración con X"
+     de los X que ya estén montados (o se acaben de montar).
+  2. **Integraciones pendientes:** lee el frontmatter (solo el frontmatter) de los
+     sistemas que **ya estaban montados**. Si alguno tiene en `se_integra_con` un
+     sistema recién montado, abre su sección "Integración con <nuevo>" y
+     aplícala, salvo que su señal diga que ya está aplicada. Es el caso de montar
+     Seguridad hoy y Publicación dentro de un mes.
+  3. Si un sistema ya montado está desactualizado respecto al plano, sincronízalo
+     **antes** de aplicar su integración (en la Pregunta 0b, "Ambos").
+- **Al sincronizar:** una entrada de migración puede tener bloques condicionados
+  a que otro sistema esté montado ("si Publicación está montado: …"). Se aplican
+  según lo que haya montado en la bóveda; ver `references/sincronizacion.md`.
+
+Las integraciones aplicadas no cambian la versión de ningún sistema: forman parte
+de la versión actual del sistema que las declara.
 
 ---
 
@@ -330,8 +418,10 @@ intacto.
 
 En **modo ampliación**, comprueba solo lo relativo al sistema nuevo: que su
 carpeta, plantilla y `.base` existen, que el README ("Sistemas disponibles") e
-`Inicio` lo enlazan, que lleva su línea `_Versión del sistema: N._`, y que
-**ningún sistema ni puntero previo ha cambiado**.
+`Inicio` lo enlazan, que lleva su línea `_Versión del sistema: N._`, que se
+aplicaron las integraciones que correspondían (las del sistema nuevo y las
+pendientes de los ya montados), y que **ningún sistema ni puntero previo ha
+cambiado fuera de lo que dicen esas secciones de integración**.
 
 En **modo montaje inicial**, comprueba todo lo siguiente:
 
@@ -349,6 +439,9 @@ En **modo montaje inicial**, comprueba todo lo siguiente:
       `_Versión del sistema: N._` con la versión que declara su fichero de
       `references/`.
 - [ ] Todas las fechas usan formato ISO; los wikilinks resuelven.
+- [ ] Entre los sistemas montados, se aplicaron todas las secciones
+      "Integración con…" que correspondían, y los que no tienen pareja montada
+      quedaron en su versión independiente.
 - [ ] Si se eligió "dejar como plantilla", los marcadores `<!-- TODO -->` están
       presentes y el sistema es navegable pese a no tener contenido de dominio.
 
