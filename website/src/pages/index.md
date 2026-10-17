@@ -31,6 +31,10 @@ that work on a repository.
   public repositories, backed by executable checks (RLS tests, AXE in CI,
   gitleaks before every commit and push) that gate when a task is done, plus a
   launch checklist for what lives outside the code.
+- **Publishing** — an optional system for how changes ship: code through pull
+  requests with required checks and a version bump, vault-only changes pushed
+  straight to main without a deploy, verified deploys, and a `pre-push` guard
+  that keeps code off the main branch.
 
 Guiding principle: **one source of truth per unit of knowledge** — never parallel
 copies; link to the origin with wikilinks.

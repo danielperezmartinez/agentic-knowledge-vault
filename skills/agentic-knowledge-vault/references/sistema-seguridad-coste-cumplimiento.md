@@ -1,6 +1,8 @@
 ---
 sistema: seguridad-coste-cumplimiento
-version: 2
+version: 3
+requiere: []
+se_integra_con: [tareas, publicacion]
 ---
 
 # Seguridad, coste y cumplimiento (Paso 9)
@@ -13,7 +15,7 @@ del código (paneles de Supabase, Vercel, etc.).
 
 Al terminar, añade su enlace en `Inicio.md` y sus reglas en la sección "Sistemas
 disponibles" del `README.md`. Bajo el encabezado del sistema en esa sección,
-escribe además la línea `_Versión del sistema: 2._` (la `version` del frontmatter
+escribe además la línea `_Versión del sistema: 3._` (la `version` del frontmatter
 de este fichero): es la marca que el modo sincronización usa para saber qué
 versión hay instalada.
 
@@ -96,7 +98,7 @@ vive en notas de la carpeta del sistema, nunca editando este bloque.
 ````markdown
 ### Seguridad, coste y cumplimiento
 
-_Versión del sistema: 2._
+_Versión del sistema: 3._
 
 Carpeta [[Seguridad/Seguridad.base|Seguridad/]]: excepciones justificadas a estas
 reglas, la [[Seguridad/Checklist de lanzamiento|checklist de lanzamiento]] y,
@@ -274,8 +276,9 @@ lo que se haga con MCP, CLI o panel.
   justificación. Sin nota, no hay excepción.
 ````
 
-Si el sistema de Tareas no está montado, la compuerta se aplica igual al criterio
-de "terminado" que use el proyecto (merge del PR, despliegue, etc.); redáctala así.
+Las dos viñetas de la compuerta están redactadas para cuando Tareas está montado;
+si no lo está, ver "Integración con Tareas". Si Publicación está montado, ver
+también "Integración con Publicación".
 
 ## 9c. Comprobaciones ejecutables
 
@@ -587,9 +590,11 @@ title = "Patrones personales (fuera del repo; no versionar ni copiar al chat)"
 `git config core.hooksPath .githooks`; en proyectos con gestor de paquetes, en un
 script `prepare` para que ocurra al instalar. Si el proyecto ya usa husky,
 lefthook o pre-commit, añade estas órdenes allí en vez de crear `.githooks/`.
-Marca los hooks como ejecutables (`git update-index --chmod=+x .githooks/*`).
-Si falta gitleaks, los hooks bloquean el commit: una revisión que se salta sola no
-es una comprobación.
+Marca los hooks como ejecutables (`git update-index --chmod=+x .githooks/*`) y
+fija sus finales de línea en `.gitattributes` con `.githooks/* text eol=lf`: con
+CRLF fallan en Linux y macOS. Si falta gitleaks, los hooks bloquean el commit: una
+revisión que se salta sola no es una comprobación. Si Publicación está montado,
+su guarda va en el mismo `pre-push` (ver "Integración con Publicación").
 
 `.githooks/_gitleaks.sh` (funciones comunes; no es un hook):
 
@@ -724,7 +729,9 @@ como secreto de CI. Por eso los hooks locales son la primera barrera, y el job l
 red para lo que se haya subido sin pasar por ellos.
 
 Cuando los jobs estén verdes, márcalos como obligatorios en la protección de la
-rama principal. Hasta entonces la compuerta de "Hecha" sigue aplicando.
+rama principal. Hasta entonces la compuerta de "Hecha" sigue aplicando. Si
+Publicación está montado, la protección de la rama es suya: ver "Integración con
+Publicación".
 
 ## 9d. Carpeta `Seguridad/`
 
@@ -955,6 +962,48 @@ views:
 [[Seguridad/Checklist de lanzamiento|Checklist de lanzamiento]]
 ```
 
+## Integración con Tareas
+
+**Qué añade si Tareas está montado:** las dos viñetas de la compuerta de 9b tal
+como están escritas ("Una tarea que toque backend o UI no pasa a `Hecha`…" y
+"Ninguna tarea pasa a `Hecha` con commits sin revisar…").
+
+**Si Tareas no está montado:** las mismas viñetas, aplicadas al criterio de
+"terminado" que use el proyecto (integrar la PR, desplegar, etc.). Por ejemplo:
+"Un cambio que toque backend o UI no se da por terminado hasta que…". Si Tareas
+se monta después, la ampliación sustituye esa redacción por la de 9b.
+
+**Señal de que ya está aplicada:** la sección del sistema contiene "no pasa a
+`Hecha`".
+
+## Integración con Publicación
+
+**Qué añade si Publicación está montado:**
+
+- En la sección del sistema, al final de "Comprobaciones y compuerta de
+  'Hecha'", la viñeta:
+
+  ```markdown
+  - Sus jobs son checks obligatorios para integrar en la rama principal; el flujo
+    de publicación está en la sección [[#Publicación]] y no se repite aquí.
+  ```
+
+- Los ficheros de hooks y CI se reparten así: la protección de la rama, el job
+  `cambios` y la guarda de `pre-push` son de Publicación (ver su sección
+  "Integración con Seguridad, coste y cumplimiento"). Si Seguridad se monta
+  **después** de Publicación, su `pre-push` sustituye al de Publicación
+  conservando la guarda: carga también `_rama_principal.sh` y llama a
+  `comprobar_rama_principal` como primera línea del bucle. Sus jobs `rls` y `a11y`
+  dependen de `cambios` con el mismo `if` que los demás jobs de código; `fugas`
+  corre siempre. Al terminar, propón añadir sus jobs a la protección de la rama,
+  con confirmación.
+
+**Si Publicación no está montado:** no se añade nada; los jobs se marcan como
+obligatorios a mano, como dice 9c.
+
+**Señal de que ya está aplicada:** la sección del sistema contiene "Sus jobs son
+checks obligatorios para integrar en la rama principal".
+
 ## 9e. Añadirlo a una bóveda ya montada
 
 Para una bóveda existente, este sistema es **nuevo**: llega por **modo
@@ -1083,3 +1132,29 @@ job `fugas`); las "Reglas fundamentales del proyecto". Si estas ya contienen una
 regla equivalente sobre repos públicos o datos sensibles, el sync no la toca:
 avisa al usuario de la duplicidad para que decida si la sustituye por un enlace
 a "Repositorio y publicación".
+
+### v2 → v3
+
+Declara las relaciones del sistema (`se_integra_con: [tareas, publicacion]`) con
+sus secciones "Integración con Tareas" e "Integración con Publicación", y fija los
+finales de línea de los hooks. En una bóveda con Tareas montado y sin Publicación,
+el contenido de la bóveda no cambia: solo se sella la versión.
+
+**Canónico — regenerar en la bóveda:**
+
+- Línea de versión de la sección del sistema a `3`.
+- Si Tareas **no** está montado: redactar la compuerta según "Integración con
+  Tareas" (versión independiente).
+- Si Publicación está montado: añadir la viñeta "Sus jobs son checks obligatorios
+  para integrar en la rama principal…" al final de "Comprobaciones y compuerta de
+  'Hecha'".
+
+**Esquema de notas — checklist (requiere OK del usuario):**
+
+- **Ficheros del repo (propuesta como diff, con OK):** añadir
+  `.githooks/* text eol=lf` a `.gitattributes` si los hooks de 9c están montados
+  y la línea no existe. Si Publicación está montado y su guarda no está en el
+  `pre-push`, encadenarla como dice "Integración con Publicación".
+
+**NO tocar:** el resto de la sección del sistema, las notas de `Seguridad/`, los
+tests, el resto de hooks, el CI y las "Reglas fundamentales del proyecto".

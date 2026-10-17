@@ -33,6 +33,10 @@ Codex, Cursor, Gemini, Copilot…) que trabajan en un repositorio.
   comprobaciones ejecutables (tests de RLS, AXE en el CI, gitleaks antes de cada
   commit y push) que deciden cuándo una tarea está hecha, y una checklist de
   lanzamiento para lo que vive fuera del código.
+- **Publicación** — un sistema opcional para cómo se publican los cambios: el
+  código por pull request con checks obligatorios y versión nueva, los cambios de
+  solo la bóveda por push directo a main sin despliegue, despliegues verificados,
+  y una guarda en `pre-push` que mantiene el código fuera de la rama principal.
 
 Principio rector: **una sola fuente de verdad por cada unidad de conocimiento** —
 nunca copias paralelas; se enlaza al origen con wikilinks.

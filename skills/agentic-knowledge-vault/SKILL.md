@@ -8,7 +8,8 @@ description: >-
   obligatorio para agentes, y sistemas de conocimiento formados por notas con
   frontmatter YAML e índices `.base` de Obsidian Bases (Tareas, ADR de
   arquitectura, decisiones visuales, catálogo técnico, seguridad, coste y
-  cumplimiento con comprobaciones ejecutables, y otros extensibles).
+  cumplimiento con comprobaciones ejecutables, publicación por PR con despliegue
+  verificado, y otros extensibles).
   Úsalo para INSTAURAR este sistema en un repositorio nuevo, para AMPLIAR una
   bóveda existente con sistemas nuevos, o para SINCRONIZAR en una bóveda ya
   montada los cambios hechos en las instrucciones de un sistema (versionado por
@@ -213,7 +214,7 @@ preguntas por llamada). Por eso los sistemas se agrupan por **categorías**:
 | Categoría | Sistemas |
 | --- | --- |
 | **Memoria y decisiones** | Tareas · ADR · Decisiones visuales y de estilos · Catálogo técnico |
-| **Calidad y publicación** | Seguridad, coste y cumplimiento |
+| **Calidad y publicación** | Seguridad, coste y cumplimiento · Publicación |
 
 - Haz **una pregunta de selección múltiple por categoría, todas en la misma
   llamada**, para que el usuario responda en un solo paso. Omite las categorías
@@ -248,7 +249,15 @@ Descripción de cada sistema (para las opciones):
   RLS, AXE en CI, gitleaks antes de cada commit y push) que deciden cuándo una
   tarea puede pasar a "Hecha", y una checklist de lanzamiento. *Recomendado en
   cualquier app con usuarios, backend o interfaz pública.* Tiene su propia
-  entrevista (ver su fichero de `references/`).
+  entrevista (ver su fichero de `references/`). Se integra con Tareas y con
+  Publicación.
+- **Publicación** — cómo llega un cambio a la rama principal y a producción: el
+  código por pull request con checks obligatorios y versión nueva, la bóveda por
+  push directo sin versión ni despliegue, cada despliegue verificado, y una guarda
+  en `pre-push` que impide subir código directo a la rama principal. Monta la
+  protección de rama, el CI y la configuración de despliegue. *Recomendado en
+  repos que se despliegan o se publican.* Tiene su propia entrevista. Se integra
+  con Seguridad (sus jobs pasan a ser checks obligatorios) y con Tareas.
 - **Otros** — pregunta libre por sistemas adicionales que el usuario quiera.
 
 > **Regla defensiva (obligatoria).** Si en cualquier momento la respuesta de
@@ -331,15 +340,16 @@ de esta tabla que correspondan, en este orden. No abras los que no vas a usar.
 | Decisiones visuales (Paso 6) | `references/sistema-decisiones-visuales.md` | Solo si se eligió. |
 | Catálogo técnico (Paso 7) | `references/sistema-catalogo-tecnico.md` | Solo si se eligió. |
 | Seguridad, coste y cumplimiento (Paso 9) | `references/sistema-seguridad-coste-cumplimiento.md` | Solo si se eligió. Incluye su entrevista propia y, para bóvedas existentes, su guía de adopción (9e). |
+| Publicación (Paso 10) | `references/sistema-publicacion.md` | Solo si se eligió. Incluye su entrevista propia y, para bóvedas existentes, su guía de adopción (10f). |
 | Configuración de Obsidian (Paso 8) | `references/obsidian.md` | Opcional; si el usuario usa Obsidian. |
 | Sincronizar sistemas montados (Modo 3) | `references/sincronizacion.md` | Solo en modo sincronización (ver Pregunta 0b). |
 
 Orden de aplicación:
 
 1. **Montaje inicial**: primero `base-compartida.md`; después, un fichero por cada
-   sistema elegido (Seguridad, coste y cumplimiento va después de Tareas, porque
-   su compuerta de "Hecha" se apoya en él si está montado); al final
-   `obsidian.md` si aplica. Cada fichero de sistema te
+   sistema elegido, en el orden de la tabla; al final `obsidian.md` si aplica.
+   Las integraciones entre sistemas se aplican cuando todos están montados (ver
+   "Relaciones entre sistemas"). Cada fichero de sistema te
    dice qué añadir a "Sistemas disponibles" del `README.md` (incluida su línea
    `_Versión del sistema: N._`) y a `Inicio.md`.
 2. **Ampliación**: NO leas `base-compartida.md`. Lee solo el/los fichero(s) del/de

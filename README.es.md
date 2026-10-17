@@ -40,6 +40,13 @@ Dentro del repositorio destino, el skill monta:
     antes de darse por hecha, y una checklist de lanzamiento para la
     configuración que vive fuera del código (topes de gasto, Auth, firewall,
     entornos de los secretos, plan, secret scanning y push protection de GitHub).
+  - **Publicación** — cómo llega un cambio a la rama principal y a producción: el
+    código por pull request con checks obligatorios y versión nueva, los cambios
+    de solo la bóveda por push directo a main sin versión ni despliegue, cada
+    despliegue verificado, y una guarda en `pre-push` que impide subir código
+    directo a main. Monta la protección de rama, un CI que distingue código de
+    bóveda y la configuración del despliegue. Usa los checks del sistema de
+    Seguridad cuando también está montado.
   - …y más; el conjunto es extensible.
 
 El principio rector: **una sola fuente de verdad por cada unidad de

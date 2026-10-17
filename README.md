@@ -38,6 +38,13 @@ Inside a target repository, the skill sets up:
     launch checklist for settings that live outside the code (spend caps, Auth,
     firewall, secret environments, plan, GitHub secret scanning and push
     protection).
+  - **Publishing** — how a change reaches the main branch and production: code
+    through a pull request with required checks and a version bump, vault-only
+    changes pushed straight to main without a version or a deploy, every deploy
+    verified, and a `pre-push` guard that stops code from being pushed straight
+    to main. It sets up branch protection, CI that tells code from vault changes,
+    and the deploy configuration. It uses the Security system's checks when that
+    system is also mounted.
   - …and more; the set is extensible.
 
 The guiding principle throughout: **one source of truth per unit of knowledge** —
